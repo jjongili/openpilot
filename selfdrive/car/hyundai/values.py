@@ -26,13 +26,13 @@ ECU_FINGERPRINT = {
 }
 
 CHECKSUM = {
-  "crc8": [CAR.NIRO],
+  "crc8": [CAR.NIRO, CAR.NIRO_EV],
   "6B": [],
 
 FEATURES = {
-  "use_cluster_gears": [],  # Use Cluster for Gear Selection, rather than Transmission
-  "use_tcu_gears": [],  # Use TCU Message for Gear Selection
-  "use_elect_gears": [],
+#  "use_cluster_gears": [],  # Use Cluster for Gear Selection, rather than Transmission
+#  "use_tcu_gears": [],  # Use TCU Message for Gear Selection
+  "use_elect_gears": [CAR.NIRO, CAR.NIRO_EV],
 }
 
 DBC = {
