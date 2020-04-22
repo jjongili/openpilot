@@ -108,9 +108,6 @@ class CarController():
     if CS.left_blinker_on or CS.right_blinker_on:
       if CS.left_blinker_flash or CS.right_blinker_flash:
         self.turning_signal_timer = 100
-      else:
-        self.turning_signal_timer = 100
-        
     if self.turning_signal_timer and CS.v_ego < 16.666667:
       lkas_active = 0
     if self.turning_signal_timer:
