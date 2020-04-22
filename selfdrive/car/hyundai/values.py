@@ -25,6 +25,10 @@ ECU_FINGERPRINT = {
   Ecu.fwdCamera: [832, 1156, 1191, 1342]
 }
 
+CHECKSUM = {
+  "crc8": [CAR.NIRO],
+  "6B": [],
+
 FEATURES = {
   "use_cluster_gears": [],  # Use Cluster for Gear Selection, rather than Transmission
   "use_tcu_gears": [],  # Use TCU Message for Gear Selection
