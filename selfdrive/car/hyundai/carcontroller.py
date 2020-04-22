@@ -36,8 +36,6 @@ def accel_hysteresis(accel, accel_steady):
 def process_hud_alert(enabled, button_on, fingerprint, visual_alert, left_line,
                        right_line, left_lane_depart, right_lane_depart):
   hud_alert = 0
-  if visual_alert == VisualAlert.steerRequired:
-    hud_alert = 4 if fingerprint in [CAR.GENESIS, CAR.GENESIS_G90, CAR.GENESIS_G80] else 3
 
   # initialize to no line visible
   
@@ -57,10 +55,6 @@ def process_hud_alert(enabled, button_on, fingerprint, visual_alert, left_line,
   # initialize to no warnings
   left_lane_warning = 0
   right_lane_warning = 0
-  if left_lane_depart:
-    left_lane_warning = 1 if fingerprint in [CAR.GENESIS, CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
-  if right_lane_depart:
-    right_lane_warning = 1 if fingerprint in [CAR.GENESIS, CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
 
   return hud_alert, lane_visible, left_lane_warning, right_lane_warning
 
@@ -104,11 +98,7 @@ class CarController():
 #      self.lkas_button_last = CS.lkas_button_on
 
     # disable if steer angle reach 90 deg, otherwise mdps fault in some models
-    if self.car_fingerprint == CAR.GENESIS:
-      lkas_active = enabled and abs(CS.angle_steers) < 90. and self.lkas_button
-    else:
-#     lkas_active = enabled and self.lkas_button
-      lkas_active = enabled
+    lkas_active = enabled
 
     # Fix for sharp turns mdps fault and Genesis hard fault at low speed
     if CS.v_ego < 15.5 and self.car_fingerprint == CAR.GENESIS and not CS.mdps_bus:

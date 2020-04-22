@@ -28,21 +28,6 @@ def create_lkas11(packer, car_fingerprint, bus, apply_steer, steer_req, cnt, ena
     "CF_Lkas_FcwOpt_USM": lkas11["CF_Lkas_FcwOpt_USM"] if keep_stock else 2,
     "CF_Lkas_LdwsOpt_USM": lkas11["CF_Lkas_LdwsOpt_USM"] if keep_stock else 3,
   }
-  if car_fingerprint == CAR.GENESIS:
-    values["CF_Lkas_Bca_R"] = 2
-    values["CF_Lkas_HbaSysState"] = lkas11["CF_Lkas_HbaSysState"] if keep_stock else 0
-    values["CF_Lkas_HbaOpt"] = lkas11["CF_Lkas_HbaOpt"] if keep_stock else 1
-    values["CF_Lkas_FcwOpt_USM"] = lkas11["CF_Lkas_FcwOpt_USM"] if keep_stock else 2
-    values["CF_Lkas_LdwsOpt_USM"] = lkas11["CF_Lkas_LdwsOpt_USM"] if keep_stock else 0
-  if car_fingerprint == CAR.K5:
-    values["CF_Lkas_Bca_R"] = 0
-    values["CF_Lkas_HbaOpt"] = lkas11["CF_Lkas_HbaOpt"] if keep_stock else 1
-    values["CF_Lkas_FcwOpt_USM"] = lkas11["CF_Lkas_FcwOpt_USM"] if keep_stock else 1
-    values["CF_Lkas_LdwsOpt_USM"] = lkas11["CF_Lkas_LdwsOpt_USM"] if keep_stock else 3
-  if car_fingerprint == CAR.SANTAFE:
-    values["CF_Lkas_FcwOpt_USM"] = 2 if enabled else 1
-    values["CF_Lkas_LdwsOpt_USM"] = 2
-    values["CF_Lkas_SysWarning"] = 0
 
   dat = packer.make_can_msg("LKAS11", 0, values)[2]
 
