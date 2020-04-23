@@ -3,18 +3,10 @@ from common.numpy_fast import clip
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
                                              create_scc12, create_mdps12
-from selfdrive.car.hyundai.values import Buttons, CAR
+from selfdrive.car.hyundai.values import Buttons, SteerLimitParams, CAR
 from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
-
-class SteerLimitParams:
-  STEER_MAX = 255   # 409 is the max, 255 is stock
-  STEER_DELTA_UP = 3
-  STEER_DELTA_DOWN = 5
-  STEER_DRIVER_ALLOWANCE = 50
-  STEER_DRIVER_MULTIPLIER = 2
-  STEER_DRIVER_FACTOR = 1
 
 # Accel limits
 ACCEL_HYST_GAP = 0.02  # don't change accel command for small oscilalitons within this value
@@ -37,7 +29,7 @@ def process_hud_alert(enabled, button_on, fingerprint, visual_alert, left_line,
                        right_line, left_lane_depart, right_lane_depart):
   hud_alert = 0
   if visual_alert == VisualAlert.steerRequired:
-    hud_alert = 4 if fingerprint in [CAR.GENESIS, CAR.GENESIS_G90, CAR.GENESIS_G80] else 3
+    hud_alert = 3
 
   # initialize to no line visible
   
@@ -97,23 +89,12 @@ class CarController():
     apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last, CS.steer_torque_driver, SteerLimitParams)
     self.steer_rate_limited = new_steer != apply_steer
 
-    ### LKAS button to temporarily disable steering
-#    if not CS.lkas_error:
-#      if CS.lkas_button_on != self.lkas_button_last:
-#        self.lkas_button = not self.lkas_button
-#      self.lkas_button_last = CS.lkas_button_on
-
-    # disable if steer angle reach 90 deg, otherwise mdps fault in some models
-    if self.car_fingerprint == CAR.GENESIS:
-      lkas_active = enabled and abs(CS.angle_steers) < 90. and self.lkas_button
-    else:
-#     lkas_active = enabled and self.lkas_button
       lkas_active = enabled
 
     # Fix for sharp turns mdps fault and Genesis hard fault at low speed
-    if CS.v_ego < 15.5 and self.car_fingerprint == CAR.GENESIS and not CS.mdps_bus:
-      self.turning_signal_timer = 100
-      
+    if CS.v_ego < 16.666667 and self.car_fingerprint == CAR.GENESIS and not CS.mdps_bus:
+      lkas_active = 0
+
     # Disable steering while turning blinker on and speed below 60 kph
     if CS.left_blinker_on or CS.right_blinker_on:
       if self.car_fingerprint in [CAR.IONIQ, CAR.KONA]:
@@ -177,12 +158,12 @@ class CarController():
         self.resume_cnt = 0
       # when lead car starts moving, create 6 RES msgs
       elif CS.lead_distance > self.last_lead_distance and (frame - self.last_resume_frame) > 5:
-        can_sends.append(create_clu11(self.packer, CS.scc_bus, CS.clu11, Buttons.RES_ACCEL, clu11_speed, self.resume_cnt))
+        can_sends.append(create_clu11(self.packer, CS.scc_bus, CS.clu11, Buttons.RES_ACCEL, clu11_speed, self.clu11_cnt))
         self.resume_cnt += 1
         # interval after 6 msgs
         if self.resume_cnt > 5:
           self.last_resume_frame = frame
-          self.resume_cnt = 0
+          self.clu11_cnt = 0
     # reset lead distnce after the car starts moving
     elif self.last_lead_distance != 0:
       self.last_lead_distance = 0  
