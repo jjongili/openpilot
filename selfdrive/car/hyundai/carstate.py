@@ -319,7 +319,6 @@ class CarState():
     return float(v_ego_x[0]), float(v_ego_x[1])
 	
   def update(self, cp, cp2, cp_cam):
-
     cp_mdps = cp2 if self.mdps_bus else cp
     cp_sas = cp2 if self.sas_bus else cp
     cp_scc = cp2 if self.scc_bus == 1 else cp_cam if self.scc_bus == 2 else cp
