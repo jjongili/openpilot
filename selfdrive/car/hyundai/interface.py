@@ -3,10 +3,13 @@ from cereal import car
 from selfdrive.config import Conversions as CV
 from selfdrive.controls.lib.drive_helpers import EventTypes as ET, create_event
 from selfdrive.controls.lib.vehicle_model import VehicleModel
-from selfdrive.car.hyundai.carstate import CarState, get_can_parser, get_can2_parser, get_camera_parser
-from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS
+from selfdrive.car.hyundai.carstate import CarState, get_can_parser, get_can2_parser, get_camera_parser, get_AVM_parser
+from selfdrive.car.hyundai.values import Ecu, ECU_FINGERPRINT, CAR, FINGERPRINTS, LaneChangeParms
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
+
+
+import common.log as trace1
 
 GearShifter = car.CarState.GearShifter
 ButtonType = car.CarState.ButtonEvent.Type
@@ -21,21 +24,26 @@ class CarInterface(CarInterfaceBase):
     self.brake_pressed_prev = False
     self.cruise_enabled_prev = False
     self.low_speed_alert = False
-    self.vEgo_prev = False
+
+    self.blinker_status = 0
+    self.blinker_timer = 0
 
     # *** init the major players ***
     self.CS = CarState(CP)
     self.cp = get_can_parser(CP)
     self.cp2 = get_can2_parser(CP)
     self.cp_cam = get_camera_parser(CP)
+    self.cp_AVM = get_AVM_parser(CP)
 
     self.CC = None
     if CarController is not None:
       self.CC = CarController(self.cp.dbc_name, CP.carFingerprint)
 
-    self.blinker_status = 0
-    self.blinker_timer = 0
-
+    self.traceLKA = trace1.Loger("LKA")
+    self.traceCLU = trace1.Loger("clu11")
+    self.traceSCC = trace1.Loger("scc12")
+    self.traceMDPS = trace1.Loger("mdps12")
+    self.traceCGW = trace1.Loger("CGW1")
 
   @staticmethod
   def compute_gb(accel, speed):
@@ -55,7 +63,11 @@ class CarInterface(CarInterfaceBase):
     ret.steerActuatorDelay = 0.15  # Default delay
     ret.steerRateCost = 0.45
     ret.steerLimitTimer = 0.8
-    tire_stiffness_factor = 0.75
+    ret.minSteerSpeed = 5 * CV.KPH_TO_MS    # 25 km/h 
+
+    tire_stiffness_factor = 0.7
+
+    #ret.radarOffCan = False
 
     if candidate in [CAR.SANTAFE, CAR.SANTAFE_1]:
       ret.lateralTuning.pid.kf = 0.00005
@@ -127,9 +139,9 @@ class CarInterface(CarInterfaceBase):
     elif candidate in [CAR.GRANDEUR_HYBRID, CAR.K7_HYBRID]:
       ret.lateralTuning.pid.kf = 0.00005
       ret.mass = 1675. + STD_CARGO_KG
-      ret.wheelbase = 2.885
-      ret.steerRatio = 12.5
-      ret.steerRateCost = 0.4
+      ret.wheelbase = 2.845
+      ret.steerRatio = 12.5  #12.5
+      ret.steerRateCost = 0.4 #0.4
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
     elif candidate == CAR.STINGER:
@@ -249,22 +261,23 @@ class CarInterface(CarInterfaceBase):
     ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0
     ret.sccBus = 0 if 1056 in fingerprint[0] else 1 if 1056 in fingerprint[1] and 1296 not in fingerprint[1] \
                                                                      else 2 if 1056 in fingerprint[2] else -1
-    ret.autoLcaEnabled = 1
+    ret.autoLcaEnabled = 0
 
     return ret
 
   # returns a car.CarState
-  def update(self, c, can_strings):
+  def update(self, c, can_strings):     # c => CC
     # ******************* do can recv *******************
     self.cp.update_strings(can_strings)
     self.cp2.update_strings(can_strings)
     self.cp_cam.update_strings(can_strings)
+    self.cp_AVM.update_strings(can_strings)
 
-    self.CS.update(self.cp, self.cp2, self.cp_cam)
+    self.CS.update(self.cp, self.cp2, self.cp_cam, self.cp_AVM)
     # create message
     ret = car.CarState.new_message()
 
-    ret.canValid = self.cp.can_valid and self.cp_cam.can_valid
+    ret.canValid = self.cp.can_valid and self.cp_cam.can_valid   #and self.cp_AVM.can_valid
 
     # speeds
     ret.vEgo = self.CS.v_ego
@@ -295,7 +308,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.steeringTorque = self.CS.steer_torque_driver
     ret.steeringPressed = self.CS.steer_override
-
+    ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
     # cruise state
     # most HKG cars has no long control, it is safer and easier to engage by main on
     ret.cruiseState.enabled = (self.CS.pcm_acc_status != 0) if self.CC.longcontrol else bool(self.CS.main_on)
@@ -305,11 +318,42 @@ class CarInterface(CarInterfaceBase):
       ret.cruiseState.speed = 0
     ret.cruiseState.available = bool(self.CS.main_on)
     ret.cruiseState.standstill = False
+
+    #ret.cruise_set_mode = self.CS.cruise_set_mode
     
     # Some HKG cars only have blinker flash signal
-    if self.CP.carFingerprint not in [CAR.IONIQ, CAR.KONA]:
-      self.CS.left_blinker_on = self.CS.left_blinker_flash or self.CS.prev_left_blinker_on and self.CC.turning_signal_timer
-      self.CS.right_blinker_on = self.CS.right_blinker_flash or self.CS.prev_right_blinker_on and self.CC.turning_signal_timer
+    # bhcho-debug  blinker signal debug
+    #if self.CP.carFingerprint in [CAR.K5, CAR.K5_HYBRID, CAR.KONA_EV, CAR.STINGER, CAR.SONATA_TURBO, CAR.IONIQ_EV, CAR.SORENTO, CAR.GRANDEUR, CAR.K7, CAR.K7_HYBRID, CAR.NEXO]:
+    #  self.CS.left_blinker_on = self.CS.left_blinker_flash or self.CS.prev_left_blinker_on and self.CC.turning_signal_timer
+    #  self.CS.right_blinker_on = self.CS.right_blinker_flash or self.CS.prev_right_blinker_on and self.CC.turning_signal_timer
+
+    blinker_status = self.CS.blinker_status
+    if  self.CS.left_blinker_flash or self.CS.right_blinker_flash:
+      self.blinker_timer = 50
+    elif self.blinker_timer: 
+      self.blinker_timer -= 1
+    else:
+      blinker_status = 0
+
+
+    if blinker_status == 3:
+      ret.leftBlinker = bool(self.blinker_timer)
+      ret.rightBlinker = bool(self.blinker_timer)
+    elif blinker_status == 1:
+      ret.leftBlinker = False
+      ret.rightBlinker = bool(self.blinker_timer)
+    elif blinker_status == 2:
+      ret.leftBlinker = bool(self.blinker_timer)
+      ret.rightBlinker = False
+    else:
+      ret.leftBlinker = False
+      ret.rightBlinker = False
+
+    
+      
+
+    #ret.leftBlinker = bool(self.CS.left_blinker_flash)
+    #ret.rightBlinker = bool(self.CS.right_blinker_flash)
 
     if self.CS.left_blinker_flash and self.CS.right_blinker_flash:
       self.blinker_status = 3
@@ -362,78 +406,116 @@ class CarInterface(CarInterfaceBase):
       
     ret.buttonEvents = buttonEvents
 
+
+    
     ret.doorOpen = not self.CS.door_all_closed
     ret.seatbeltUnlatched = not self.CS.seatbelt
 
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
-    if ret.vEgo < self.CP.minSteerSpeed and self.CP.minSteerSpeed > 10.:
-      self.low_speed_alert = True
-    if ret.vEgo > self.CP.minSteerSpeed:
-      self.low_speed_alert = False
+
 
     # turning indicator alert hysteresis logic
-    self.turning_indicator_alert = True if self.CC.turning_signal_timer and self.CS.v_ego < 16.666667 else False
+    self.turning_indicator_alert = self.CC.turning_indicator
+  
     # LKAS button alert logic
-#    if self.CP.carFingerprint in [CAR.K5, CAR.K5_HYBRID, CAR.SORENTO, CAR.GRANDEUR, CAR.IONIQ_EV, CAR.KONA_EV]:
-#      self.lkas_button_alert = True if not self.CC.lkas_button else False
-#    if self.CP.carFingerprint in [CAR.KONA, CAR.IONIQ]:
-#      self.lkas_button_alert = True if self.CC.lkas_button else False
-#    if self.CP.carFingerprint in [CAR.GRANDEUR_HYBRID, CAR.K7_HYBRID]:
-#      self.lkas_button_alert = False
+    self.lkas_button_alert = not self.CC.lkas_button
+    self.low_speed_alert = self.CC.low_speed_car
+    self.steer_angle_over_alert = self.CC.streer_angle_over
+
+
 
     events = []
-    if not ret.gearShifter == GearShifter.drive:
-      events.append(create_event('wrongGear', [ET.NO_ENTRY, ET.USER_DISABLE]))
-    if ret.doorOpen:
-      events.append(create_event('doorOpen', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
-    if ret.seatbeltUnlatched:
-      events.append(create_event('seatbeltNotLatched', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
-    if self.CS.esp_disabled:
-      events.append(create_event('espDisabled', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
-    if not self.CS.main_on:
-      events.append(create_event('wrongCarMode', [ET.NO_ENTRY, ET.USER_DISABLE]))
-    if ret.gearShifter == GearShifter.reverse:
-      events.append(create_event('reverseGear', [ET.NO_ENTRY, ET.IMMEDIATE_DISABLE]))
-    if self.CS.steer_error:
-      events.append(create_event('steerTempUnavailable', [ET.NO_ENTRY, ET.WARNING]))
 
-    if ret.cruiseState.enabled and not self.cruise_enabled_prev:
-      events.append(create_event('pcmEnable', [ET.ENABLE]))
-    elif not ret.cruiseState.enabled:
-      events.append(create_event('pcmDisable', [ET.USER_DISABLE]))
+    if not self.CS.main_on:
+      events.append(create_event('wrongCarMode', [ET.NO_ENTRY, ET.USER_DISABLE])) 
+
+    if self.CS.esp_disabled:
+      events.append(create_event('espDisabled', [ET.NO_ENTRY, ET.SOFT_DISABLE])) 
+    elif ret.doorOpen:
+      events.append(create_event('doorOpen', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
+    elif ret.seatbeltUnlatched:
+      events.append(create_event('seatbeltNotLatched', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
+    elif ret.gearShifter == GearShifter.reverse:
+      events.append(create_event('reverseGear', [ET.NO_ENTRY, ET.USER_DISABLE]))      
+    elif not ret.gearShifter == GearShifter.drive:
+      events.append(create_event('wrongGear', [ET.NO_ENTRY, ET.USER_DISABLE]))
+    elif self.steer_angle_over_alert or self.CS.steer_error:
+      events.append(create_event('steerTempUnavailable', [ET.NO_ENTRY, ET.WARNING]))
+    elif self.lkas_button_alert:
+      events.append(create_event('lkasButtonOff', [ET.WARNING]))
+    elif self.CS.lkas_LdwsLHWarning or self.CS.lkas_LdwsRHWarning:
+      events.append(create_event('ldwPermanent', [ET.WARNING]))
+    
+    if ret.cruiseState.enabled != self.cruise_enabled_prev:
+        if ret.cruiseState.enabled:
+            events.append(create_event('pcmEnable', [ET.ENABLE]))
+        else:
+            events.append(create_event('pcmDisable', [ET.USER_DISABLE]))
+        self.cruise_enabled_prev = ret.cruiseState.enabled
+    elif  ret.cruiseState.enabled:
+        if self.turning_indicator_alert:
+          events.append(create_event('turningIndicatorOn', [ET.WARNING]))
+        elif self.CC.steer_torque_over:
+          events.append(create_event('steerTorqueOver', [ET.WARNING]))          
+        elif self.CS.stopped:
+          if ret.cruiseState.standstill:
+            events.append(create_event('resumeRequired', [ET.WARNING]))
+          else:
+            events.append(create_event('preStoped', [ET.WARNING]))
+        #elif self.low_speed_alert and not self.CS.mdps_bus:
+        #  events.append(create_event('belowSteerSpeed', [ET.WARNING]))
 
     # disable on pedals rising edge or when brake is pressed and speed isn't zero
-    if ((ret.gasPressed and not self.gas_pressed_prev) or \
-      (ret.brakePressed and (not self.brake_pressed_prev or ret.vEgoRaw > 0.1))) and self.CC.longcontrol:
-      events.append(create_event('pedalPressed', [ET.NO_ENTRY, ET.USER_DISABLE]))
+    if self.CC.longcontrol:
+      if ((ret.gasPressed and not self.gas_pressed_prev) or (ret.brakePressed and (not self.brake_pressed_prev or ret.vEgoRaw > 0.1))):
+          events.append(create_event('pedalPressed', [ET.NO_ENTRY, ET.USER_DISABLE]))
+      if ret.gasPressed:
+        events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
 
-    if ret.gasPressed and self.CC.longcontrol:
-      events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
 
-    if self.low_speed_alert and not self.CS.mdps_bus :
-      events.append(create_event('belowSteerSpeed', [ET.WARNING]))
-    if self.turning_indicator_alert:
-      events.append(create_event('turningIndicatorOn', [ET.WARNING]))
-#    if self.lkas_button_alert:
-#      events.append(create_event('lkasButtonOff', [ET.WARNING]))
     #TODO Varible for min Speed for LCA
-    if ret.rightBlinker and ret.lcaRight and self.CS.v_ego > (60 * CV.KPH_TO_MS):
+    if ret.rightBlinker and ret.lcaRight and self.CS.v_ego > LaneChangeParms.LANE_CHANGE_SPEED_MIN: 
       events.append(create_event('rightLCAbsm', [ET.WARNING]))
-    if ret.leftBlinker and ret.lcaLeft and self.CS.v_ego > (60 * CV.KPH_TO_MS):
+    if ret.leftBlinker and ret.lcaLeft and self.CS.v_ego > LaneChangeParms.LANE_CHANGE_SPEED_MIN: 
       events.append(create_event('leftLCAbsm', [ET.WARNING]))
 
     ret.events = events
 
     self.gas_pressed_prev = ret.gasPressed
     self.brake_pressed_prev = ret.brakePressed
-    self.cruise_enabled_prev = ret.cruiseState.enabled
-    self.vEgo_prev = ret.vEgo
+
+
+    #self.log_update( can_strings )
 
     return ret.as_reader()
 
-  def apply(self, c):
+  def apply(self, c, sm ):
     can_sends = self.CC.update(c.enabled, self.CS, self.frame, c.actuators,
-                               c.cruiseControl.cancel, c.hudControl.visualAlert, c.hudControl.leftLaneVisible,
-                               c.hudControl.rightLaneVisible, c.hudControl.leftLaneDepart, c.hudControl.rightLaneDepart)
+                               c.cruiseControl.cancel, c.hudControl.visualAlert, 
+                               c.hudControl.leftLaneVisible, c.hudControl.rightLaneVisible, sm )
     self.frame += 1
     return can_sends
+
+
+
+
+  def log_update(self, can_string):
+      v_ego = self.CS.v_ego * CV.MS_TO_KPH
+      log_v_ego = ' v_ego={:5.0f} km/h '.format( v_ego ) 
+      if v_ego > 10:
+          log_data =  log_v_ego + str(self.CS.lkas11)
+          self.traceLKA.add( log_data )
+
+          log_data = log_v_ego + str(self.CS.clu11)      
+          self.traceCLU.add( log_data )
+
+          log_data = log_v_ego + str(self.CS.scc12)      
+          self.traceSCC.add( log_data )
+
+          log_data = log_v_ego + str(self.CS.mdps12)      
+          self.traceMDPS.add( log_data )
+
+      log_data = log_v_ego + str(self.CS.cgw1)      
+      self.traceCGW.add( log_data )
+
+      

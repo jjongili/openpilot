@@ -41,13 +41,9 @@ button_delay = 0.2
 kegman = kegman_conf()
 kegman.conf['tuneGernby'] = "1"
 #kegman.write_config(kegman.conf)
-param = ["cameraOffset", "Kp", "Ki", "Kf", "steerRatio", "sR_boost", "sR_BP0", \
-         "sR_BP1", "sR_time", "steerRateCost"]
-#param = ["Kp", "Ki", "Kf", "steerRatio", "sR_boost", "sR_BP0", \
-#         "sR_BP1", "sR_time", "steerRateCost", "deadzone", "slowOnCurves", \
-#         "1barBP0", "1barBP1", "1barMax", "2barBP0", "2barBP1", \
-#         "2barMax", "3barBP0", "3barBP1", "3barMax", \
-#         "1barHwy", "2barHwy", "3barHwy"]
+param = ["cameraOffset", "Kp", "Ki", "Kf", "steerRatio", "steerRateCost", \
+         "sR_boost", "sR_BP0", "sR_BP1", "sR_time", \
+         "sR_Kp", "sR_Ki"]
 
 j = 0
 while True:
@@ -67,6 +63,17 @@ while True:
 
   char  = getch()
   write_json = False
+  if (char == "P"):
+    j = 0
+  elif (char == "I"):
+    j = 1
+  elif (char == "R"):
+    j = 3
+  elif (char == "B"):
+    j = 5
+  elif (char == "K"):
+    j = 9
+
   if (char == "v"):
     kegman.conf[param[j]] = str(round((float(kegman.conf[param[j]]) - 0.00001),5))
     write_json = True
@@ -154,9 +161,19 @@ while True:
 
   if float(kegman.conf['Kp']) > 3:
     kegman.conf['Kp'] = "3"
+
+  if float(kegman.conf['sR_Kp']) < 0:
+    kegman.conf['sR_Kp'] = "0" 
+
+  if float(kegman.conf['sR_Kp']) > 3:
+    kegman.conf['sR_Kp'] = "3"
+
+  if float(kegman.conf['sR_Ki']) < 0:
+    kegman.conf['sR_Ki'] = "0" 
+
+  if float(kegman.conf['sR_Ki']) > 2:
+    kegman.conf['sR_Ki'] = "2"  
     
-  if kegman.conf['liveParams'] != "1" and kegman.conf['liveParams'] != "0":
-    kegman.conf['liveParams'] = "1"
     
   if float(kegman.conf['steerRatio']) < 1 and float(kegman.conf['steerRatio']) != -1:
     kegman.conf['steerRatio'] = "1"
@@ -243,7 +260,9 @@ while True:
     kegman.conf['Kf'] = "0.01"    
     
   if float(kegman.conf['Kf']) < 0:
-    kegman.conf['Kf'] = "0"    
+    kegman.conf['Kf'] = "0"
+
+
     
   if float(kegman.conf['sR_boost']) < 0:
     kegman.conf['sR_boost'] = "0"

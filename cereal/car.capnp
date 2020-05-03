@@ -97,6 +97,9 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     rightLCAbsm @71;
     leftLCAbsm @72;
     preventLCA @73;
+    preStoped @74;
+    steerTorqueOver @75;
+    ldwPermanent @76;
   }
 }
 
@@ -140,6 +143,7 @@ struct CarState {
   # gear
   gearShifter @14 :GearShifter;
 
+
   # button presses
   buttonEvents @11 :List(ButtonEvent);
   leftBlinker @20 :Bool;
@@ -162,6 +166,7 @@ struct CarState {
 
   lcaLeft @36 :Bool;
   lcaRight @37 :Bool;
+
 
   # which packets this state came from
   canMonoTimes @12: List(UInt64);

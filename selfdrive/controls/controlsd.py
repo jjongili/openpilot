@@ -7,11 +7,15 @@ from common.numpy_fast import clip
 from common.realtime import sec_since_boot, set_realtime_priority, Ratekeeper, DT_CTRL
 from common.profiler import Profiler
 from common.params import Params
+
+import common.log as  trace1
+
 import cereal.messaging as messaging
+
 from selfdrive.config import Conversions as CV
 from selfdrive.boardd.boardd import can_list_to_can_capnp
 from selfdrive.car.car_helpers import get_car, get_startup_alert
-from selfdrive.controls.lib.lane_planner import CAMERA_OFFSET
+
 from selfdrive.controls.lib.drive_helpers import get_events, \
                                                  create_event, \
                                                  EventTypes as ET, \
@@ -35,6 +39,9 @@ HwType = log.HealthData.HwType
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
 LaneChangeBSM = log.PathPlan.LaneChangeBSM
+
+
+traceCS = trace1.Loger("control")
 
 def add_lane_change_event(events, path_plan):
   if path_plan.laneChangeState == LaneChangeState.preLaneChange:
@@ -93,7 +100,7 @@ def data_sample(CI, CC, sm, can_sock, state, mismatch_counter, can_error_counter
   #bsm alerts
   if lane_change_bsm == LaneChangeBSM.left:
       events.append(create_event('preventLCA', [ET.WARNING]))
-  if lane_change_bsm == LaneChangeBSM.right:
+  elif lane_change_bsm == LaneChangeBSM.right:
       events.append(create_event('preventLCA', [ET.WARNING]))
   
 
@@ -255,7 +262,7 @@ def state_control(frame, rcv_frame, plan, path_plan, CS, CP, state, events, v_cr
       extra_text = ""
       if e == "belowSteerSpeed":
         if is_metric:
-          extra_text = str(int(round(CP.minSteerSpeed * CV.MS_TO_KPH))) + " kph"
+          extra_text = str(int(round(CP.minSteerSpeed * CV.MS_TO_KPH))) + " km/h"
         else:
           extra_text = str(int(round(CP.minSteerSpeed * CV.MS_TO_MPH))) + " mph"
       AM.add(frame, e, enabled, extra_text_2=extra_text)
@@ -287,10 +294,13 @@ def state_control(frame, rcv_frame, plan, path_plan, CS, CP, state, events, v_cr
     if e == "calibrationIncomplete":
       extra_text_1 = str(cal_perc) + "%"
       if is_metric:
-        extra_text_2 = str(int(round(Filter.MIN_SPEED * CV.MS_TO_KPH))) + " kph"
+        extra_text_2 = str(int(round(Filter.MIN_SPEED * CV.MS_TO_KPH))) + " km/h"
       else:
         extra_text_2 = str(int(round(Filter.MIN_SPEED * CV.MS_TO_MPH))) + " mph"
     AM.add(frame, str(e) + "Permanent", enabled, extra_text_1=extra_text_1, extra_text_2=extra_text_2)
+
+
+
 
   return actuators, v_cruise_kph, v_acc_sol, a_acc_sol, lac_log, last_blinker_frame
 
@@ -299,6 +309,8 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
               LaC, LoC, read_only, start_time, v_acc, a_acc, lac_log, events_prev,
               last_blinker_frame, is_ldw_enabled, can_error_counter):
   """Send actuators and hud commands to the car, send controlsstate and MPC logging"""
+  global trace1
+
 
   CC = car.CarControl.new_message()
   CC.enabled = isEnabled(state)
@@ -317,37 +329,37 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
   CC.hudControl.lanesVisible = isEnabled(state)
   CC.hudControl.leadVisible = sm['plan'].hasLead
 
-  right_lane_visible = sm['pathPlan'].rProb > 0.5
-  left_lane_visible = sm['pathPlan'].lProb > 0.5
-  CC.hudControl.rightLaneVisible = bool(right_lane_visible)
-  CC.hudControl.leftLaneVisible = bool(left_lane_visible)
+  right_lane_visible = sm['pathPlan'].rProb
+  left_lane_visible = sm['pathPlan'].lProb
 
-  recent_blinker = (sm.frame - last_blinker_frame) * DT_CTRL < 5.0  # 5s blinker cooldown
-  calibrated = sm['liveCalibration'].calStatus == Calibration.CALIBRATED
-  ldw_allowed = CS.vEgo > 31 * CV.MPH_TO_MS and not recent_blinker and is_ldw_enabled and not isActive(state) and calibrated
+  lane_dPoly = sm['pathPlan'].dPoly
+  lane_width = sm['pathPlan'].laneWidth
+  lane_lPoly = sm['pathPlan'].lPoly
+  lane_rPloy = sm['pathPlan'].rPoly
 
-  md = sm['model']
-  if len(md.meta.desirePrediction):
-    l_lane_change_prob = md.meta.desirePrediction[log.PathPlan.Desire.laneChangeLeft - 1]
-    r_lane_change_prob = md.meta.desirePrediction[log.PathPlan.Desire.laneChangeRight - 1]
+  #str_dPoly = 'P='
+  #for x in lane_dPoly:
+  #  str_dPoly += '{:.5f},'.format( x )
 
-    l_lane_close = left_lane_visible and (sm['pathPlan'].lPoly[3] < (1.08 - CAMERA_OFFSET))
-    r_lane_close = right_lane_visible and (sm['pathPlan'].rPoly[3] > -(1.08 + CAMERA_OFFSET))
+  #str_log = 'L:{:.1f}/{:.1f} w:{:.1f} {}'.format( left_lane_visible, right_lane_visible, lane_width, str_dPoly )
+  #trace1.printf( str_log )
+  #traceCS.add( str_log  )
 
-    if ldw_allowed:
-      CC.hudControl.leftLaneDepart = bool(l_lane_change_prob > LANE_DEPARTURE_THRESHOLD and l_lane_close)
-      CC.hudControl.rightLaneDepart = bool(r_lane_change_prob > LANE_DEPARTURE_THRESHOLD and r_lane_close)
+  lane_visible = right_lane_visible + left_lane_visible
 
-  if CC.hudControl.rightLaneDepart or CC.hudControl.leftLaneDepart:
-    AM.add(sm.frame, 'ldwPermanent', False)
-    events.append(create_event('ldw', [ET.PERMANENT]))
+  if lane_visible > 1:
+    CC.hudControl.rightLaneVisible = True
+    CC.hudControl.leftLaneVisible = True
+  else:    
+    CC.hudControl.rightLaneVisible = bool(right_lane_visible > 0.4)
+    CC.hudControl.leftLaneVisible = bool(left_lane_visible > 0.4)
 
   AM.process_alerts(sm.frame)
-  CC.hudControl.visualAlert = AM.visual_alert
+  CC.hudControl.visualAlert = AM.visual_alert   # steer hand check. 
 
   if not read_only:
     # send car controls over can
-    can_sends = CI.apply(CC)
+    can_sends = CI.apply(CC, sm)
     pm.send('sendcan', can_list_to_can_capnp(can_sends, msgtype='sendcan', valid=CS.canValid))
 
   force_decel = sm['dMonitoringState'].awarenessStatus < 0.
@@ -380,9 +392,9 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
     "longControlState": LoC.long_control_state,
     "vPid": float(LoC.v_pid),
     "vCruise": float(v_cruise_kph),
-    "upAccelCmd": float(LoC.pid.p),
-    "uiAccelCmd": float(LoC.pid.i),
-    "ufAccelCmd": float(LoC.pid.f),
+    "upAccelCmd": float(LaC.pid.p),
+    "uiAccelCmd": float(LaC.pid.i),
+    "ufAccelCmd": float(LaC.pid.f),
     "angleSteersDes": float(LaC.angle_steers_des),
     "vTargetLead": float(v_acc),
     "aTarget": float(a_acc),
@@ -394,7 +406,9 @@ def data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk
     "startMonoTime": int(start_time * 1e9),
     "mapValid": sm['plan'].mapValid,
     "forceDecel": bool(force_decel),
-    "canErrorCounter": can_error_counter,
+    "canErrorCounter": trace1.cruise_set_mode,
+    "alertTextMsg1": str(trace1.global_alertTextMsg1),
+    "alertTextMsg2": str(trace1.global_alertTextMsg2),
   }
 
   if CP.lateralTuning.which() == 'pid':
@@ -459,8 +473,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
     pm = messaging.PubMaster(['sendcan', 'controlsState', 'carState', 'carControl', 'carEvents', 'carParams'])
 
   if sm is None:
-    sm = messaging.SubMaster(['thermal', 'health', 'liveCalibration', 'dMonitoringState', 'plan', 'pathPlan', \
-                              'model'])
+    sm = messaging.SubMaster(['thermal', 'health', 'liveCalibration', 'dMonitoringState', 'plan', 'pathPlan', 'model'])
 
 
   if can_sock is None:
@@ -531,20 +544,25 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
   internet_needed = params.get("Offroad_ConnectivityNeeded", encoding='utf8') is not None
 
   prof = Profiler(False)  # off by default
-  
-  hyundai_lkas = read_only
+
+
+  hyundai_lkas = True  #read_only
+  hyundai_timer1 = 0
+  hyundai_timer2 = 200
   while True:
     start_time = sec_since_boot()
     prof.checkpoint("Ratekeeper", ignore=True)
 
     # Sample data and compute car events
     CS, events, cal_perc, mismatch_counter, can_error_counter = data_sample(CI, CC, sm, can_sock, state, mismatch_counter, can_error_counter, params)
-    
+
     if read_only:
       hyundai_lkas = read_only
+    elif hyundai_timer2:
+      hyundai_timer2 -= 1
     elif CS.cruiseState.enabled:
-#    elif state == State.enabled:
       hyundai_lkas = False
+      hyundai_timer1 = 0
 
     prof.checkpoint("Sample")
 
@@ -553,22 +571,24 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
       events.append(create_event('radarCommIssue', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
     elif not sm.all_alive_and_valid():
       events.append(create_event('commIssue', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
-    if not sm['pathPlan'].mpcSolutionValid:
+    elif not sm['pathPlan'].mpcSolutionValid:
       events.append(create_event('plannerError', [ET.NO_ENTRY, ET.IMMEDIATE_DISABLE]))
-    if not sm['pathPlan'].sensorValid:
-      events.append(create_event('sensorDataInvalid', [ET.NO_ENTRY, ET.PERMANENT]))
-    if not sm['pathPlan'].paramsValid:
+    elif not sm['pathPlan'].paramsValid:
       events.append(create_event('vehicleModelInvalid', [ET.WARNING]))
-    if not sm['pathPlan'].posenetValid:
+    elif not sm['pathPlan'].posenetValid:
       events.append(create_event('posenetInvalid', [ET.NO_ENTRY, ET.WARNING]))
-    if not sm['plan'].radarValid:
+    elif not sm['plan'].radarValid:
       events.append(create_event('radarFault', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
-    if sm['plan'].radarCanError:
+    elif sm['plan'].radarCanError:
       events.append(create_event('radarCanError', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
-    if not CS.canValid:
+    elif not CS.canValid:
       events.append(create_event('canError', [ET.NO_ENTRY, ET.IMMEDIATE_DISABLE]))
+
     if not sounds_available:
       events.append(create_event('soundsUnavailable', [ET.NO_ENTRY, ET.PERMANENT]))
+    if not sm['pathPlan'].sensorValid:
+      events.append(create_event('sensorDataInvalid', [ET.NO_ENTRY, ET.PERMANENT]))
+
 #    if internet_needed:
 #      events.append(create_event('internetConnectivityNeeded', [ET.NO_ENTRY, ET.PERMANENT]))
 #    if community_feature_disallowed:
@@ -606,6 +626,12 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
 #    if state == State.disabled:
       hyundai_lkas = True
 
+    #trace1.printf( 'hyundai_lkas={:.0f}  cruse={},  cruise_kph={:.0f}'.format(hyundai_lkas,  CS.cruiseState.enabled,  v_cruise_kph) )    
+
+    if not CS.cruiseState.enabled and not hyundai_lkas:
+        hyundai_timer1 += 1
+        if hyundai_timer1 > 50:
+          hyundai_lkas = True
 
 def main(sm=None, pm=None, logcan=None):
   controlsd_thread(sm, pm, logcan)

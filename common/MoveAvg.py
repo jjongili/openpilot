@@ -33,3 +33,27 @@ class MoveAvg():
 
         self.data_avg = self.data_sum / self.data_cnt
         return  self.data_avg
+
+
+
+    def get_min(self, steer_angle_dest, max_cnt ):
+        self.data_steer.append( steer_angle_dest )
+        self.data_cnt += 1
+
+        delta = self.data_cnt - max_cnt
+        if self.data_cnt > max_cnt:
+            self.data_cnt = max_cnt
+
+            if delta > 0:
+                del self.data_steer[:delta]
+            else:
+                self.data_steer.pop(0)
+
+
+        data_min = 255
+        for enum in self.data_steer:
+            if data_min > enum:
+                data_min = enum
+
+
+        return  data_min

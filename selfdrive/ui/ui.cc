@@ -295,6 +295,8 @@ void handle_message(UIState *s, Message * msg) {
     if (datad.vCruise != s->scene.v_cruise) {
       s->scene.v_cruise_update_ts = eventd.logMonoTime;
     }
+
+
     s->scene.v_cruise = datad.vCruise;
     s->scene.v_ego = datad.vEgo;
     s->scene.angleSteers = datad.angleSteers;
@@ -309,6 +311,35 @@ void handle_message(UIState *s, Message * msg) {
     s->scene.frontview = datad.rearViewCam;
 
     s->scene.decel_for_model = datad.decelForModel;
+
+
+// PID
+    s->scene.pid.p = datad.upAccelCmd;
+    s->scene.pid.i = datad.uiAccelCmd;
+    s->scene.pid.f = datad.ufAccelCmd;
+
+// debug Message
+
+    s->scene.status.vCurvature = datad.vCurvature;
+    s->scene.status.cruise_set_mode = datad.canErrorCounter;    
+    s->scene.status.nCanError = datad.canErrorCounter;
+    if (datad.alertTextMsg1.str) 
+    {
+      snprintf(s->scene.status.alert_text1, sizeof(s->scene.status.alert_text1), "%s", datad.alertTextMsg1.str);
+    } 
+    else 
+    {
+      s->scene.status.alert_text1[0] = '\0';
+    }
+
+    if (datad.alertTextMsg2.str) 
+    {
+      snprintf(s->scene.status.alert_text2, sizeof(s->scene.status.alert_text2), "%s", datad.alertTextMsg2.str);
+    } 
+    else 
+    {
+      s->scene.status.alert_text2[0] = '\0';
+    }
 
     // getting steering related data for dev ui
     s->scene.angleSteersDes = datad.angleSteersDes;
@@ -366,15 +397,19 @@ void handle_message(UIState *s, Message * msg) {
     }
 
     s->scene.alert_blinkingrate = datad.alertBlinkingRate;
-    if (datad.alertBlinkingRate > 0.) {
-      if (s->alert_blinked) {
-        if (s->alert_blinking_alpha > 0.0 && s->alert_blinking_alpha < 1.0) {
+    if (datad.alertBlinkingRate > 0.) 
+    {
+      if (s->alert_blinked) 
+      {
+        if (s->alert_blinking_alpha > 0.0 && s->alert_blinking_alpha < 1.0) 
+        {
           s->alert_blinking_alpha += (0.05*datad.alertBlinkingRate);
         } else {
           s->alert_blinked = false;
         }
       } else {
-        if (s->alert_blinking_alpha > 0.25) {
+        if (s->alert_blinking_alpha > 0.25) 
+        {
           s->alert_blinking_alpha -= (0.05*datad.alertBlinkingRate);
         } else {
           s->alert_blinking_alpha += 0.25;
@@ -485,8 +520,10 @@ void handle_message(UIState *s, Message * msg) {
     s->scene.brakeLights = datad.brakeLights;
     if(s->scene.leftBlinker!=datad.leftBlinker || s->scene.rightBlinker!=datad.rightBlinker)
       s->scene.blinker_blinkingrate = 100;
+      
     s->scene.leftBlinker = datad.leftBlinker;
     s->scene.rightBlinker = datad.rightBlinker;
+
 
   } else if (eventd.which == cereal_Event_gpsLocationExternal) {
     struct cereal_GpsLocationData datad;
@@ -504,15 +541,19 @@ void handle_message(UIState *s, Message * msg) {
   capn_free(&ctx);
 }
 
-static void ui_update(UIState *s) {
+static void ui_update(UIState *s) 
+{
   int err;
 
-  if (s->vision_connect_firstrun) {
+  if (s->vision_connect_firstrun) 
+  {
     // cant run this in connector thread because opengl.
     // do this here for now in lieu of a run_on_main_thread event
 
-    for (int i=0; i<UI_BUF_COUNT; i++) {
-      if(s->khr[i] != NULL) {
+    for (int i=0; i<UI_BUF_COUNT; i++) 
+    {
+      if(s->khr[i] != NULL) 
+      {
         visionimg_destroy_gl(s->khr[i], s->priv_hnds[i]);
         glDeleteTextures(1, &s->frame_texs[i]);
       }
@@ -586,7 +627,8 @@ static void ui_update(UIState *s) {
 
   zmq_pollitem_t polls[1] = {{0}};
   // Take an rgb image from visiond if there is one
-  while(true) {
+  while(true) 
+  {
     assert(s->ipc_fd >= 0);
     polls[0].fd = s->ipc_fd;
     polls[0].events = ZMQ_POLLIN;
@@ -619,7 +661,9 @@ static void ui_update(UIState *s) {
       s->vision_connected = false;
       return;
     }
-    if (rp.type == VIPC_STREAM_ACQUIRE) {
+
+    if (rp.type == VIPC_STREAM_ACQUIRE) 
+    {
       bool front = rp.d.stream_acq.type == VISION_STREAM_RGB_FRONT;
       int idx = rp.d.stream_acq.idx;
 
@@ -861,7 +905,8 @@ int is_leon() {
 
 
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) 
+{
   int err;
   setpriority(PRIO_PROCESS, 0, -14);
 
@@ -906,16 +951,21 @@ int main(int argc, char* argv[]) {
   const int MIN_VOLUME = LEON ? 12 : 9;
   const int MAX_VOLUME = LEON ? 15 : 12;
 
+
   set_volume(MIN_VOLUME);
   s->volume_timeout = 5 * UI_FREQ;
   int draws = 0;
-  while (!do_exit) {
+  while (!do_exit) 
+  {
+
     bool should_swap = false;
-    if (!s->vision_connected) {
+    if (!s->vision_connected) 
+    {
       // Delay a while to avoid 9% cpu usage while car is not started and user is keeping touching on the screen.
       // Don't hold the lock while sleeping, so that vision_connect_thread have chances to get the lock.
       usleep(30 * 1000);
     }
+
     pthread_mutex_lock(&s->lock);
     double u1 = millis_since_boot();
 
@@ -926,33 +976,43 @@ int main(int argc, char* argv[]) {
     if (smooth_brightness > 255) smooth_brightness = 255;
     set_brightness(s, (int)smooth_brightness);
 
-    if (!s->vision_connected) {
+    if (!s->vision_connected) 
+    {
       // Car is not started, keep in idle state and awake on touch events
       zmq_pollitem_t polls[1] = {{0}};
       polls[0].fd = s->touch_fd;
       polls[0].events = ZMQ_POLLIN;
       int ret = zmq_poll(polls, 1, 0);
-      if (ret < 0){
+      if (ret < 0)
+      {
         if (errno == EINTR) continue;
         LOGW("poll failed (%d)", ret);
-      } else if (ret > 0) {
+      } 
+      else if (ret > 0) 
+      {
         // awake on any touch
         int touch_x = -1, touch_y = -1;
         int touched = touch_read(&touch, &touch_x, &touch_y);
-        if (touched == 1) {
+        if (touched == 1) 
+        {
           set_awake(s, true);
         }
       }
-      if (s->status != STATUS_STOPPED) {
+      if (s->status != STATUS_STOPPED) 
+      {
         update_status(s, STATUS_STOPPED);
       }
-    } else {
-      if (s->status == STATUS_STOPPED) {
+    } 
+    else 
+    {
+      if (s->status == STATUS_STOPPED) 
+      {
         update_status(s, STATUS_DISENGAGED);
       }
       // Car started, fetch a new rgb image from ipc and peek for zmq events.
       ui_update(s);
-      if(!s->vision_connected) {
+      if(!s->vision_connected) 
+      {
         // Visiond process is just stopped, force a redraw to make screen blank again.
         ui_draw(s);
         glFinish();
@@ -975,7 +1035,8 @@ int main(int argc, char* argv[]) {
     }
 
     // Don't waste resources on drawing in case screen is off or car is not started.
-    if (s->awake && s->vision_connected) {
+    if (s->awake && s->vision_connected) 
+    {
       dashcam(s, touch_x, touch_y);
       ui_draw(s);
       glFinish();
@@ -1002,9 +1063,11 @@ int main(int argc, char* argv[]) {
 
       // if visiond is still running and controlsState times out, display an alert
       // TODO: refactor this to not be here
-      if (s->controls_seen && s->vision_connected && strcmp(s->scene.alert_text2, "Controls Unresponsive") != 0) {
+      if (s->controls_seen && s->vision_connected && strcmp(s->scene.alert_text2, "Controls Unresponsive") != 0) 
+      {
         s->scene.alert_size = ALERTSIZE_FULL;
-        if (s->status != STATUS_STOPPED) {
+        if (s->status != STATUS_STOPPED) 
+        {
           update_status(s, STATUS_ALERT);
         }
         snprintf(s->scene.alert_text1, sizeof(s->scene.alert_text1), "%s", "TAKE CONTROL IMMEDIATELY");
@@ -1029,9 +1092,11 @@ int main(int argc, char* argv[]) {
 
     // the bg thread needs to be scheduled, so the main thread needs time without the lock
     // safe to do this outside the lock?
-    if (should_swap) {
+    if (should_swap) 
+    {
       double u2 = millis_since_boot();
-      if (u2-u1 > 66) {
+      if (u2-u1 > 66) 
+      {
         // warn on sub 15fps
         LOGW("slow frame(%d) time: %.2f", draws, u2-u1);
       }

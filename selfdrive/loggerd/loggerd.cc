@@ -615,14 +615,18 @@ int main(int argc, char** argv) {
   bool is_streaming = false;
   bool is_logging = false;
 
-  if (argc > 1 && strcmp(argv[1], "--stream") == 0) {
+  if (argc > 1 && strcmp(argv[1], "--stream") == 0) 
+  {
     is_streaming = true;
-  } else if (argc > 1 && strcmp(argv[1], "--only-stream") == 0) {
+  } 
+  else if (argc > 1 && strcmp(argv[1], "--only-stream") == 0) 
+  {
     is_streaming = true;
     is_logging = false;
   }
 
-  if (is_logging) {
+  if (is_logging) 
+  {
     err = logger_next(&s.logger, LOG_ROOT, s.segment_path, sizeof(s.segment_path), &s.rotate_segment);
     assert(err == 0);
     LOGW("logging to %s", s.segment_path);

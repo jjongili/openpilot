@@ -113,6 +113,11 @@ class kegman_conf():
         self.config.update({"sR_time":"0.2"})
         self.element_updated = True
 
+      if "sR_Kp" not in self.config:
+        self.config.update({"sR_Kp":"0.25"})
+        self.config.update({"sR_Ki":"0.05"})
+        self.element_updated = True
+
       if "ALCnudgeLess" not in self.config:
         self.config.update({"ALCnudgeLess":"1"})
         self.config.update({"ALCminSpeed":"16.666667"})

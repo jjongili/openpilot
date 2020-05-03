@@ -1,17 +1,18 @@
 import crcmod
 from selfdrive.car.hyundai.values import CAR, CHECKSUM
 
+import common.log as trace1
+
 hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
 def create_lkas11(packer, car_fingerprint, bus, apply_steer, steer_req, cnt, enabled, lkas11, hud_alert,
-                                   lane_visible, left_lane_depart, right_lane_depart, keep_stock=False):
+                                   lane_visible, keep_stock=False):
   values = {
     "CF_Lkas_Bca_R": lkas11["CF_Lkas_Bca_R"] if keep_stock else 3,
-    #"CF_Lkas_LdwsSysState": 3 if steer_req else lane_visible,
-    "CF_Lkas_LdwsSysState": 3 if enabled else 1,
-    "CF_Lkas_SysWarning": hud_alert,
-    "CF_Lkas_LdwsLHWarning": left_lane_depart,
-    "CF_Lkas_LdwsRHWarning": right_lane_depart,
+    "CF_Lkas_LdwsSysState": lkas11["CF_Lkas_LdwsSysState"] if not enabled else lane_visible,
+    "CF_Lkas_SysWarning": lkas11["CF_Lkas_SysWarning"] if not enabled else hud_alert,
+    "CF_Lkas_LdwsLHWarning": lkas11["CF_Lkas_LdwsLHWarning"],
+    "CF_Lkas_LdwsRHWarning": lkas11["CF_Lkas_LdwsRHWarning"],
     "CF_Lkas_HbaLamp": lkas11["CF_Lkas_HbaLamp"] if keep_stock else 0,
     "CF_Lkas_FcwBasReq": lkas11["CF_Lkas_FcwBasReq"] if keep_stock else 0,
     "CR_Lkas_StrToqReq": apply_steer,
@@ -28,16 +29,7 @@ def create_lkas11(packer, car_fingerprint, bus, apply_steer, steer_req, cnt, ena
     "CF_Lkas_FcwOpt_USM": lkas11["CF_Lkas_FcwOpt_USM"] if keep_stock else 2,
     "CF_Lkas_LdwsOpt_USM": lkas11["CF_Lkas_LdwsOpt_USM"] if keep_stock else 3,
   }
-  if car_fingerprint == CAR.GENESIS:
-    values["CF_Lkas_Bca_R"] = 2
-    values["CF_Lkas_HbaSysState"] = lkas11["CF_Lkas_HbaSysState"] if keep_stock else 0
-    values["CF_Lkas_HbaOpt"] = lkas11["CF_Lkas_HbaOpt"] if keep_stock else 1
-    values["CF_Lkas_FcwOpt_USM"] = lkas11["CF_Lkas_FcwOpt_USM"] if keep_stock else 2
-    values["CF_Lkas_LdwsOpt_USM"] = lkas11["CF_Lkas_LdwsOpt_USM"] if keep_stock else 0
-  if car_fingerprint == CAR.K5:
-    values["CF_Lkas_Bca_R"] = 0
-    values["CF_Lkas_HbaOpt"] = lkas11["CF_Lkas_HbaOpt"] if keep_stock else 1
-    values["CF_Lkas_FcwOpt_USM"] = lkas11["CF_Lkas_FcwOpt_USM"] if keep_stock else 0
+
 
   dat = packer.make_can_msg("LKAS11", 0, values)[2]
 
@@ -104,7 +96,7 @@ def create_scc12(packer, apply_accel, enabled, cnt, scc12):
 
   return packer.make_can_msg("SCC12", 0, values)
 
-def create_mdps12(packer, car_fingerprint, cnt, mdps12):
+def create_mdps12(packer, car_fingerprint, cnt, mdps12 ):
   values = {
     "CR_Mdps_StrColTq": mdps12["CR_Mdps_StrColTq"],
     "CF_Mdps_Def": mdps12["CF_Mdps_Def"],
@@ -124,3 +116,41 @@ def create_mdps12(packer, car_fingerprint, cnt, mdps12):
   values["CF_Mdps_Chksum2"] = checksum
 
   return packer.make_can_msg("MDPS12", 2, values)
+
+
+def create_AVM(packer, car_fingerprint, avm_hu, CS):
+
+  popup = avm_hu["AVM_Popup_Msg"]
+  disp  = avm_hu["AVM_Display_Message"]   # 61: Disp,  1:Normal
+  view = avm_hu["AVM_View"]    # 3: fwd, 2:bwd,  5:left,  7:right
+
+  #left = CS.blinker_status == 2
+  #right = CS.blinker_status == 1
+
+  #if not popup:
+  #  if left or right:
+  #      popup = 1
+  #      disp = 61
+  #      if left:
+  #        view = 5
+  #      elif right:
+  #        view = 7
+
+  #trace1.printf( 'popup={:.0f},disp={:.0f},view={:.0f} L:{:.0f}R:{:.0f}'.format(popup, disp, view, left, right) )
+
+  values = {
+    "AVM_View": view,
+    "AVM_ParkingAssist_BtnSts": avm_hu["AVM_ParkingAssist_BtnSts"],
+    "AVM_Display_Message": disp,
+    "AVM_Popup_Msg": popup,   # 1
+    "AVM_Ready": avm_hu["AVM_Ready"],
+    "AVM_ParkingAssist_Step": avm_hu["AVM_ParkingAssist_Step"],
+    "AVM_FrontBtn_Type": avm_hu["AVM_FrontBtn_Type"],
+    "AVM_Option": avm_hu["AVM_Option"],
+    "AVM_HU_FrontViewPointOpt": avm_hu["AVM_HU_FrontViewPointOpt"],
+    "AVM_HU_RearView_Option": avm_hu["AVM_HU_RearView_Option"],
+    "AVM_HU_FrontView_Option": avm_hu["AVM_HU_FrontView_Option"],
+    "AVM_Version": avm_hu["AVM_Version"],
+  }
+
+  return packer.make_can_msg("AVM_HU_PE_00", 0, values)

@@ -52,13 +52,13 @@ if __name__ == "__main__":
         elif args.dump_json:
           print(json.dumps(evt.to_dict()))
         elif values:
-          print("logMonotime = {}".format(evt.logMonoTime))
+          print("logMonotime_bhcho = {}".format(evt.logMonoTime))
           for value in values:
             if hasattr(evt, value[0]):
               item = evt
               for key in value:
                 item = getattr(item, key)
-              print("{} = {}".format(".".join(value), item))
-          print("")
+              #print("{} = {}".format(".".join(value), item))
+          #print("")
         else:
           print(evt)
