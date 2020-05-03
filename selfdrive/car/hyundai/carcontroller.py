@@ -280,10 +280,10 @@ class CarController():
 
     hud_alert, lane_visible = self.process_hud_alert(lkas_active, self.lkas_button, visual_alert, self.hud_timer_left, self.hud_timer_right, CS )    
 
-    #clu11_speed = CS.clu11["CF_Clu_Vanz"]
-    #enabled_speed = 38 if CS.is_set_speed_in_mph  else 60
-    #if clu11_speed > enabled_speed or not lkas_active:
-    #  enabled_speed = clu11_speed
+    clu11_speed = CS.clu11["CF_Clu_Vanz"]
+    enabled_speed = 38 if CS.is_set_speed_in_mph  else 60
+    if clu11_speed > enabled_speed or not lkas_active:
+      enabled_speed = clu11_speed
 
     can_sends = []
 
@@ -306,25 +306,25 @@ class CarController():
                                    CS.lkas11, hud_alert, lane_visible, keep_stock=True))
 
     #  2. clu
-    #if CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
-    #  can_sends.append(create_clu11(self.packer, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed, self.clu11_cnt))
+    if CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
+      can_sends.append(create_clu11(self.packer, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed, self.clu11_cnt))
 
-    #if pcm_cancel_cmd and self.longcontrol:
-    #  can_sends.append(create_clu11(self.packer, CS.scc_bus, CS.clu11, Buttons.CANCEL, clu11_speed, self.clu11_cnt))
-    #else: # send mdps12 to LKAS to prevent LKAS error if no cancel cmd
-    can_sends.append(create_mdps12(self.packer, self.car_fingerprint, self.mdps12_cnt, CS.mdps12))
+    if pcm_cancel_cmd and self.longcontrol:
+      can_sends.append(create_clu11(self.packer, CS.scc_bus, CS.clu11, Buttons.CANCEL, clu11_speed, self.clu11_cnt))
+    else: # send mdps12 to LKAS to prevent LKAS error if no cancel cmd
+      can_sends.append(create_mdps12(self.packer, self.car_fingerprint, self.mdps12_cnt, CS.mdps12))
 
-    #if CS.scc_bus and self.longcontrol and frame % 2: # send scc12 to car if SCC not on bus 0 and longcontrol enabled
-    #  can_sends.append(create_scc12(self.packer, apply_accel, enabled, self.scc12_cnt, CS.scc12))
-    #  self.scc12_cnt += 1
+    if CS.scc_bus and self.longcontrol and frame % 2: # send scc12 to car if SCC not on bus 0 and longcontrol enabled
+      can_sends.append(create_scc12(self.packer, apply_accel, enabled, self.scc12_cnt, CS.scc12))
+      self.scc12_cnt += 1
 
     
          
 
     # AVM
-    #if CS.mdps_bus:
-    #if not CS.cp_AVM.can_valid:
-    #can_sends.append(create_AVM(self.packer, self.car_fingerprint, CS.avm, CS ))
+    if CS.mdps_bus:
+      if not CS.cp_AVM.can_valid:
+        can_sends.append(create_AVM(self.packer, self.car_fingerprint, CS.avm, CS ))
     
 
     if CS.stopped:
