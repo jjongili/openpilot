@@ -952,7 +952,7 @@ static void ui_draw_debug(UIState *s)
 
 
   nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
-  nvgFontSize(s->vg, 36*1.5);
+  nvgFontSize(s->vg, 36*1.8);
 
   snprintf(speed_str, sizeof(speed_str), "P:%.5f", scene->pid.p );
   nvgText(s->vg, x_pos, y_pos+0, speed_str, NULL);
