@@ -4,7 +4,7 @@ from selfdrive.config import Conversions as CV
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.spdcontroller  import SpdController
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
-                                             create_scc12, create_mdps12, create_AVM
+                                             create_scc12, create_mdps12
 from selfdrive.car.hyundai.values import Buttons, SteerLimitParams, LaneChangeParms, CAR
 from opendbc.can.packer import CANPacker
 
@@ -313,14 +313,6 @@ class CarController():
     if CS.scc_bus and self.longcontrol and frame % 2: # send scc12 to car if SCC not on bus 0 and longcontrol enabled
       can_sends.append(create_scc12(self.packer, apply_accel, enabled, self.scc12_cnt, CS.scc12))
       self.scc12_cnt += 1
-
-    
-         
-
-    # AVM
-    #if CS.mdps_bus:
-    #if not CS.cp_AVM.can_valid:
-    #  can_sends.append(create_AVM(self.packer, self.car_fingerprint, CS.avm, CS ))
     
 
     if CS.stopped:

@@ -291,33 +291,6 @@ def get_camera_parser(CP):
   return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 2)
 
 
-
-
-def get_AVM_parser(CP):
-
-  signals = [
-    # sig_name, sig_address, default
-    ("AVM_View", "AVM_HU_PE_00", 0),
-    ("AVM_ParkingAssist_BtnSts", "AVM_HU_PE_00", 0),
-    ("AVM_Display_Message", "AVM_HU_PE_00", 0),
-    ("AVM_Popup_Msg", "AVM_HU_PE_00", 0),
-    ("AVM_Ready", "AVM_HU_PE_00", 0),
-    ("AVM_ParkingAssist_Step", "AVM_HU_PE_00", 0),
-    ("AVM_FrontBtn_Type", "AVM_HU_PE_00", 0),
-    ("AVM_Option", "AVM_HU_PE_00", 0),
-    ("AVM_HU_FrontViewPointOpt", "AVM_HU_PE_00", 0),
-    ("AVM_HU_RearView_Option", "AVM_HU_PE_00", 0),
-    ("AVM_HU_FrontView_Option", "AVM_HU_PE_00", 0),
-    ("AVM_Version", "AVM_HU_PE_00", 0),
-  ]
-
-  checks = []
-
-  checks += [
-    ("AVM_HU_PE_00", 50),
-  ]
-  return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 0)
-
 class CarState():
 
   def __init__(self, CP):
@@ -419,7 +392,7 @@ class CarState():
 
 
 
-  def update(self, cp, cp2, cp_cam, cp_avm ):
+  def update(self, cp, cp2, cp_cam ):
 
 
     cp_mdps = cp2 if self.mdps_bus else cp
@@ -438,24 +411,6 @@ class CarState():
     self.brake_pressed = cp.vl["TCS13"]['DriverBraking']
     self.esp_disabled = cp.vl["TCS15"]['ESC_Off_Step']
     self.park_brake = cp.vl["CGW1"]['CF_Gway_ParkBrakeSw']
-
-    self.Navi_HDA = cp.vl["SCC11"]['Navi_SCC_Camera_Act']   #  Cam Area 2,  Highway 1, normal 0
-
-
-    # AVM
-    self.AVM_View = cp_avm.vl["AVM_HU_PE_00"]["AVM_View"]
-    self.AVM_ParkAssist_btn = cp_avm.vl["AVM_HU_PE_00"]["AVM_ParkingAssist_BtnSts"]
-    self.AVM_Disp_Msg = cp_avm.vl["AVM_HU_PE_00"]["AVM_Display_Message"]
-    self.AVM_Popup_Msg = cp_avm.vl["AVM_HU_PE_00"]["AVM_Popup_Msg"]
-    self.AVM_Ready= cp_avm.vl["AVM_HU_PE_00"]["AVM_Ready"]
-    self.AVM_ParkAssit_step = cp_avm.vl["AVM_HU_PE_00"]["AVM_ParkingAssist_Step"]
-    self.AVM_FrontBtn = cp_avm.vl["AVM_HU_PE_00"]["AVM_FrontBtn_Type"]
-    self.AVM_Option = cp_avm.vl["AVM_HU_PE_00"]["AVM_Option"]
-    self.AVM_HU_FrontView = cp_avm.vl["AVM_HU_PE_00"]["AVM_HU_FrontViewPointOpt"]
-    self.AVM_HU_RearView = cp_avm.vl["AVM_HU_PE_00"]["AVM_HU_RearView_Option"]
-    self.AVM_HU_FrontView = cp_avm.vl["AVM_HU_PE_00"]["AVM_HU_FrontView_Option"]
-    self.AVM_Version = cp_avm.vl["AVM_HU_PE_00"]["AVM_Version"]
-
 
     self.main_on = (cp_scc.vl["SCC11"]["MainMode_ACC"] != 0) if not self.no_radar else \
                                             cp.vl['EMS16']['CRUISE_LAMP_M']
@@ -561,7 +516,6 @@ class CarState():
     self.scc12 = cp_scc.vl["SCC12"]
     self.mdps12 = cp_mdps.vl["MDPS12"]
     self.cgw1 = cp.vl["CGW1"]
-    self.avm = cp_avm.vl["AVM_HU_PE_00"]  
   
     # blinker process
     blinker_status = 0
