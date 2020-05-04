@@ -102,10 +102,6 @@ class CarController():
     elif right_line:
       lane_visible = 6      # right lan icon
 
-    if enabled and CS.Navi_HDA >= 1:  # highway Area
-      if CS.v_ego > 40 * CV.KPH_TO_MS:
-        lane_visible = 4
-
     # 7 : hud can't display,   panel :  LKA, handle icon. 
     return hud_alert, lane_visible
 

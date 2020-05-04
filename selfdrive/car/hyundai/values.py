@@ -314,4 +314,4 @@ DBC = {
   CAR.NEXO: dbc_dict('hyundai_kia_generic', None),
 }
 
-STEER_THRESHOLD = 80
+STEER_THRESHOLD = 150
