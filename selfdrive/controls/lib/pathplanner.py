@@ -130,7 +130,7 @@ class PathPlanner():
           
         self.sR = [float(kegman.conf['steerRatio']), (float(kegman.conf['steerRatio']) + float(kegman.conf['sR_boost']))]
         self.sRBP = [float(kegman.conf['sR_BP0']), float(kegman.conf['sR_BP1'])]
-        self.sR_time = int(float(kegman.conf['sR_time'])) * 100
+        self.sR_time = int(float(kegman.conf['sR_time']) * 100.)
          
       self.mpc_frame = 0
     

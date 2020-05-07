@@ -195,7 +195,7 @@ static void rotate_video() {
   elapsed_time = 0;
   stop_capture();
   captureState = CAPTURE_STATE_CAPTURING;
-  start_capture();
+//  start_capture();
 }
 
 void draw_lock_button(UIState *s) {
@@ -280,7 +280,7 @@ void screen_toggle_record_state() {
   }
   else {
     //captureState = CAPTURE_STATE_CAPTURING;
-    start_capture();
+//    start_capture();
   }
 }
 
