@@ -509,6 +509,10 @@ def main():
     params.put("OpenpilotEnabledToggle", "1")
   if params.get("LaneChangeEnabled") is None:
     params.put("LaneChangeEnabled", "1")
+  if params.get("SpeedControlEnabled") is None:
+    params.put("SpeedControlEnabled", "0")
+  if params.get("CarAvoidanceEnabled") is None:
+    params.put("CarAvoidanceEnabled", "0")
 
   # is this chffrplus?
   if os.getenv("PASSIVE") is not None:
