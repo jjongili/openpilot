@@ -65,8 +65,11 @@ def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
 def create_clu11(packer, frame, clu11, button):
   values = clu11
   values["CF_Clu_CruiseSwState"] = button
-  values["CF_Clu_CruiseSwState"] = frame % 0x10
+  values["CF_Clu_AliveCnt1"] = frame % 0x10
   return packer.make_can_msg("CLU11", 0, values)
+
+
+
 
 
 def create_lfa_mfa(packer, frame, enabled):
@@ -87,3 +90,26 @@ def create_lfa_mfa(packer, frame, enabled):
   # HDA_USM: nothing
 
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
+
+
+def create_mdps12(packer, car_fingerprint, cnt, mdps12 ):
+  values = {
+    "CR_Mdps_StrColTq": mdps12["CR_Mdps_StrColTq"],
+    "CF_Mdps_Def": mdps12["CF_Mdps_Def"],
+    "CF_Mdps_ToiActive": 0,
+    "CF_Mdps_ToiUnavail": 1,
+    "CF_Mdps_MsgCount2": cnt,
+    "CF_Mdps_Chksum2": 0,
+    "CF_Mdps_ToiFlt": mdps12["CF_Mdps_ToiFlt"],
+    "CF_Mdps_SErr": mdps12["CF_Mdps_SErr"],
+    "CR_Mdps_StrTq": mdps12["CR_Mdps_StrTq"],
+    "CF_Mdps_FailStat": mdps12["CF_Mdps_FailStat"],
+    "CR_Mdps_OutTq": mdps12["CR_Mdps_OutTq"],
+  }
+
+  
+  dat = packer.make_can_msg("MDPS12", 2, values)[2]
+  checksum = sum(dat) % 256
+  values["CF_Mdps_Chksum2"] = checksum
+
+  return packer.make_can_msg("MDPS12", 2, values)

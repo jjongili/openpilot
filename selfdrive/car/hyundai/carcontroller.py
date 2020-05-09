@@ -1,6 +1,6 @@
 from cereal import car
 from selfdrive.car import apply_std_steer_torque_limits
-from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create_lfa_mfa
+from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create_lfa_mfa, create_mdps12
 from selfdrive.car.hyundai.values import Buttons, SteerLimitParams, CAR
 from opendbc.can.packer import CANPacker
 from common.params import Params
@@ -47,6 +47,8 @@ class CarController():
     self.resume_cnt = 0
     self.last_resume_frame = 0
     self.last_lead_distance = 0
+
+    self.lkas11_cnt = 0
 
     # dp
     self.dragon_enable_steering_on_signal = False
@@ -96,15 +98,27 @@ class CarController():
                         left_lane, right_lane, left_lane_depart, right_lane_depart)
 
     can_sends = []
-    can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
+
+    if frame == 0: # initialize counts from last received count signals
+      self.lkas11_cnt = CS.lkas11["CF_Lkas_MsgCount"] + 1
+      #self.scc12_cnt = CS.scc12["CR_VSM_Alive"] + 1 if not CS.no_radar else 0
+
+    self.lkas11_cnt %= 0x10
+    #self.clu11_cnt = frame % 0x10
+    self.mdps12_cnt = frame % 0x100
+
+    can_sends.append(create_lkas11(self.packer, self.lkas11_cnt, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled,
                                    left_lane, right_lane,
                                    left_lane_warning, right_lane_warning))
 
-    if pcm_cancel_cmd:
-      can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.CANCEL))
 
-    elif CS.out.cruiseState.standstill:
+    can_sends.append(create_mdps12(self.packer, self.car_fingerprint, self.mdps12_cnt, CS.mdps12))
+
+    #if pcm_cancel_cmd:
+    #  can_sends.append(create_clu11(self.packer, frame, CS.clu11, Buttons.CANCEL))
+
+    if CS.out.cruiseState.standstill:
       # run only first time when the car stopped
       if self.last_lead_distance == 0:
         # get the lead distance from the Radar
@@ -117,7 +131,7 @@ class CarController():
         # interval after 6 msgs
         if self.resume_cnt > 5:
           self.last_resume_frame = frame
-          self.clu11_cnt = 0
+          self.resume_cnt = 0
     # reset lead distnce after the car starts moving
     elif self.last_lead_distance != 0:
       self.last_lead_distance = 0
@@ -127,4 +141,6 @@ class CarController():
     if frame % 5 == 0 and self.car_fingerprint in [CAR.SONATA, CAR.PALISADE]:
       can_sends.append(create_lfa_mfa(self.packer, frame, enabled))
 
+
+    self.lkas11_cnt += 1
     return can_sends
