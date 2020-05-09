@@ -185,7 +185,7 @@ managed_processes = {
   "sensord": ("selfdrive/sensord", ["./sensord"]),
   "clocksd": ("selfdrive/clocksd", ["./clocksd"]),
   "gpsd": ("selfdrive/sensord", ["./gpsd"]),
-  "updated": "selfdrive.updated",
+  #"updated": "selfdrive.updated",
   "dmonitoringmodeld": ("selfdrive/modeld", ["./dmonitoringmodeld"]),
   "modeld": ("selfdrive/modeld", ["./modeld"]),
   "driverview": "selfdrive.controls.lib.driverview",
@@ -482,7 +482,7 @@ def manager_thread():
 
     if msg.thermal.started and "driverview" not in running:
       for p in car_started_processes:
-        if p == "loggerd" and logger_dead:
+        if (p == "loggerd" and logger_dead) or p == "uploader":
           kill_managed_process(p)
         else:
           start_managed_process(p)
