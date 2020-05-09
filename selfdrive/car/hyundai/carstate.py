@@ -36,8 +36,15 @@ class CarState(CarStateBase):
 
     # cruise state
     ret.cruiseState.available = True
-    ret.cruiseState.enabled = cp.vl["SCC12"]['ACCMode'] != 0
+    #ret.cruiseState.enabled = cp.vl["SCC12"]['ACCMode'] != 0
     ret.cruiseState.standstill = cp.vl["SCC11"]['SCCInfoDisplay'] == 4.
+
+
+    ret.cruiseState.enabled = (cp.vl["SCC11"]["MainMode_ACC"] != 0) 
+    #self.acc_active = (cp.vl["SCC12"]['ACCMode'] != 0)
+    #self.pcm_acc_status = int(self.acc_active)
+
+
 
     if ret.cruiseState.enabled:
       is_set_speed_in_mph = int(cp.vl["CLU11"]["CF_Clu_SPEED_UNIT"])
@@ -61,6 +68,10 @@ class CarState(CarStateBase):
 
     ret.gasPressed = pedal_gas > 1e-3
     ret.gas = pedal_gas
+
+
+    str_log = 'carstate.py  out={}  ACCMode={} MainMode_ACC={}'.format( ret.cruiseState.enabled, cp.vl["SCC12"]['ACCMode'], cp.vl["SCC11"]["MainMode_ACC"]  )
+    print( str_log )
 
     # TODO: refactor gear parsing in function
     # Gear Selection via Cluster - For those Kia/Hyundai which are not fully discovered, we can use the Cluster Indicator for Gear Selection, as this seems to be standard over all cars, but is not the preferred method.
