@@ -40,10 +40,18 @@ def plannerd_thread(sm=None, pm=None):
   while True:
     sm.update()
 
+    nlist = 0
+    for s in sm.updated:
+      nlist += 1
+      str_log = 'sevice_list{}  s={}  alive={} valid={}'.format( sm.updated,  s, sm.alive[s],  sm.valid[s]  )
+      print(  str_log ) 
+
     if sm.updated['model']:
       PP.update(sm, pm, CP, VM)
     else:
       print( 'ERR => sm.updated_model' )
+
+
 
 
     if sm.updated['radarState']:
