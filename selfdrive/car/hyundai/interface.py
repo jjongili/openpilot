@@ -178,7 +178,7 @@ class CarInterface(CarInterfaceBase):
     ret = self.CS.update(self.cp, self.cp_cam)
     ret.canValid = self.cp.can_valid and self.cp_cam.can_valid
 
-    log_str = 'interface={} cp={} cam={} str={}'.format( ret.canValid,  self.cp.can_valid, self.cp_cam.can_valid , can_strings )
+    log_str = 'interface={} cp={} cam={} '.format( ret.canValid,  self.cp.can_valid, self.cp_cam.can_valid )
     print( log_str )
 
     # TODO: button presses
