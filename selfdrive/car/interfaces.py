@@ -42,6 +42,8 @@ class CarInterfaceBase():
     self.dp_last_modified = None
     self.dp_gear_check = True
 
+    print( 'call class CarInterfaceBase():')
+
   @staticmethod
   def calc_accel_override(a_ego, a_target, v_ego, v_target):
     return 1.
