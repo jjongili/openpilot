@@ -97,6 +97,11 @@ class CarController():
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
                         left_lane, right_lane, left_lane_depart, right_lane_depart)
 
+    clu11_speed = CS.clu11["CF_Clu_Vanz"]
+    enabled_speed = 38 if CS.is_set_speed_in_mph  else 60
+    if clu11_speed > enabled_speed or not lkas_active:
+      enabled_speed = clu11_speed
+
     can_sends = []
 
     if frame == 0: # initialize counts from last received count signals
@@ -104,7 +109,7 @@ class CarController():
       #self.scc12_cnt = CS.scc12["CR_VSM_Alive"] + 1 if not CS.no_radar else 0
 
     self.lkas11_cnt %= 0x10
-    #self.clu11_cnt = frame % 0x10
+    self.clu11_cnt = frame % 0x10
     self.mdps12_cnt = frame % 0x100
 
     can_sends.append(create_lkas11(self.packer, self.lkas11_cnt, self.car_fingerprint, apply_steer, lkas_active,
@@ -112,6 +117,10 @@ class CarController():
                                    left_lane, right_lane,
                                    left_lane_warning, right_lane_warning))
 
+    if CS.mdps_bus: # send lkas12 bus 1 if mdps or scc is on bus 1
+      can_sends.append(create_lkas11(self.packer, self.car_fingerprint, 1, apply_steer, steer_req, self.lkas11_cnt, lkas_active,
+                                   CS.lkas11, hud_alert, lane_visible, left_lane_depart, right_lane_depart, keep_stock=True))
+      can_sends.append(create_clu11(self.packer, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed, self.clu11_cnt))
 
     can_sends.append(create_mdps12(self.packer, self.car_fingerprint, self.mdps12_cnt, CS.mdps12))
 
