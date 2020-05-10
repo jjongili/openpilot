@@ -12,9 +12,6 @@ const int HYUNDAI_STANDSTILL_THRSLD = 30;  // ~1kph
 // TODO: do checksum and counter checks
 AddrCheckStruct hyundai_rx_checks[] = {
   {.addr = {593}, .bus = 0, .expected_timestep = 20000U},
-														 
-														 
-														 
   {.addr = {1057}, .bus = 0, .expected_timestep = 20000U},
 };
 const int HYUNDAI_RX_CHECK_LEN = sizeof(hyundai_rx_checks) / sizeof(hyundai_rx_checks[0]);
