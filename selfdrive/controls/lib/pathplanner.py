@@ -322,7 +322,11 @@ class PathPlanner():
     plan_send.pathPlan.laneChangeDirection = self.lane_change_direction
     plan_send.pathPlan.alcAllowed = self.dragon_auto_lc_allowed
 
+
+
     pm.send('pathPlan', plan_send)
+
+    print( 'sm_model alive={} valid={}'.format( sm.alive['pathPlan'],  sm.valid['pathPlan'] ))
 
     if LOG_MPC:
       dat = messaging.new_message('liveMpc')
