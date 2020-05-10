@@ -175,10 +175,13 @@ class CarInterface(CarInterfaceBase):
     self.cp.update_strings(can_strings)
     self.cp_cam.update_strings(can_strings)
 
+    log_str = 'interface1 cp={} cam={} '.format(  self.cp.can_valid, self.cp_cam.can_valid )
+    print( log_str )
+
     ret = self.CS.update(self.cp, self.cp_cam)
     ret.canValid = self.cp.can_valid and self.cp_cam.can_valid
 
-    log_str = 'interface={} cp={} cam={} '.format( ret.canValid,  self.cp.can_valid, self.cp_cam.can_valid )
+    log_str = 'interface2={} cp={} cam={} '.format( ret.canValid,  self.cp.can_valid, self.cp_cam.can_valid )
     print( log_str )
 
     # TODO: button presses

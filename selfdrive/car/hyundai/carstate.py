@@ -165,6 +165,10 @@ class CarState(CarStateBase):
       ("CF_Gway_TurnSigRh", "CGW1", 0),
       ("CF_Gway_ParkBrakeSw", "CGW1", 0),
 
+      ("BRAKE_ACT", "EMS12", 0),
+      ("PV_AV_CAN", "EMS12", 0),
+      ("TPS", "EMS12", 0),
+
       ("CYL_PRES", "ESP12", 0),
 
       ("CF_Clu_CruiseSwState", "CLU11", 0),
@@ -238,26 +242,24 @@ class CarState(CarStateBase):
 
       ("TPS", "EMS12", 0),
 
-
-      ("CF_Lca_Stat", "LCA11", 0),
-      ("CF_Lca_IndLeft", "LCA11", 0),
-      ("CF_Lca_IndRight", "LCA11", 0),  
     ]
 
     checks = [
       # address, frequency
       ("MDPS12", 50),
-      ("TCS13", 50),
+      #("TCS13", 50),
+
       ("TCS15", 10),
       ("CLU11", 50),
       ("ESP12", 100),
       ("CGW1", 10),
       ("CGW4", 5),
       ("WHL_SPD11", 50),
+      
       ("SAS11", 100),
       ("SCC11", 50),
       ("SCC12", 50),
-      ("EMS12", 100),
+      #("EMS12", 100),
     ]
     if CP.carFingerprint in FEATURES["use_cluster_gears"]:
       signals += [
@@ -288,6 +290,75 @@ class CarState(CarStateBase):
       ]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 0)
+
+
+  @staticmethod
+  def get_can2_parser(CP):
+    signals = []
+    checks = []
+
+    if CP.mdpsBus == 1:
+      signals += [
+        ("CR_Mdps_StrColTq", "MDPS12", 0),
+        ("CF_Mdps_Def", "MDPS12", 0),
+        ("CF_Mdps_ToiActive", "MDPS12", 0),
+        ("CF_Mdps_ToiUnavail", "MDPS12", 0),
+        ("CF_Mdps_MsgCount2", "MDPS12", 0),
+        ("CF_Mdps_Chksum2", "MDPS12", 0),
+        ("CF_Mdps_ToiFlt", "MDPS12", 0),
+        ("CF_Mdps_SErr", "MDPS12", 0),
+        ("CR_Mdps_StrTq", "MDPS12", 0),
+        ("CF_Mdps_FailStat", "MDPS12", 0),
+        ("CR_Mdps_OutTq", "MDPS12", 0)
+      ]
+      checks += [
+        ("MDPS12", 50)
+      ]
+    if CP.sasBus == 1:
+      signals += [
+        ("SAS_Angle", "SAS11", 0),
+        ("SAS_Speed", "SAS11", 0),
+      ]
+      checks += [
+        ("SAS11", 100)
+      ]
+    if CP.sccBus == 1:
+      signals += [
+        ("MainMode_ACC", "SCC11", 0),
+        ("VSetDis", "SCC11", 0),
+        ("SCCInfoDisplay", "SCC11", 0),
+        ("ACC_ObjDist", "SCC11", 0),
+        ("ACC_ObjRelSpd", "SCC11", 0),
+        ("TauGapSet", "SCC11", 0),
+
+        ("ACCMode", "SCC12", 0),
+        ("CF_VSM_Prefill", "SCC12", 0),
+        ("CF_VSM_DecCmdAct", "SCC12", 0),
+        ("CF_VSM_HBACmd", "SCC12", 0),
+        ("CF_VSM_Warn", "SCC12", 0),
+        ("CF_VSM_Stat", "SCC12", 0),
+        ("CF_VSM_BeltCmd", "SCC12", 0),
+        ("ACCFailInfo", "SCC12", 0),
+        ("ACCMode", "SCC12", 0),
+        ("StopReq", "SCC12", 0),
+        ("CR_VSM_DecCmd", "SCC12", 0),
+        ("aReqMax", "SCC12", 0),
+        ("TakeOverReq", "SCC12", 0),
+        ("PreFill", "SCC12", 0),
+        ("aReqMin", "SCC12", 0),
+        ("CF_VSM_ConfMode", "SCC12", 0),
+        ("AEB_Failinfo", "SCC12", 0),
+        ("AEB_Status", "SCC12", 0),
+        ("AEB_CmdAct", "SCC12", 0),
+        ("AEB_StopReq", "SCC12", 0),
+        ("CR_VSM_Alive", "SCC12", 0),
+        ("CR_VSM_ChkSum", "SCC12", 0)
+      ]
+      checks += [
+        ("SCC11", 50),
+        ("SCC12", 50),
+      ]
+    return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 1)
 
   @staticmethod
   def get_cam_can_parser(CP):
