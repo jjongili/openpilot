@@ -133,8 +133,7 @@ class CarState(CarStateBase):
     self.steer_warning = cp.vl["MDPS12"]['CF_Mdps_ToiUnavail']
     self.lead_distance = cp.vl["SCC11"]['ACC_ObjDist']
 
-    print( ' lkas ={} ', self.lkas11 )
-
+  
     return ret
 
   @staticmethod
