@@ -326,7 +326,7 @@ class PathPlanner():
 
     pm.send('pathPlan', plan_send)
 
-    print( 'sm_model alive={} valid={}'.format( pm.alive['pathPlan'],  pm.valid['pathPlan'] ))
+    print( 'sm_model valid={} lane_widthd={}'.format( plan_send.valid, self.LP.lane_widthd ))
 
     if LOG_MPC:
       dat = messaging.new_message('liveMpc')
