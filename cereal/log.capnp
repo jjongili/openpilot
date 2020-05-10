@@ -802,7 +802,7 @@ struct PathPlan {
   laneChangeBSM @20 :LaneChangeBSM;
 
   # dragonpilot
-  alcAllowed @20 :Bool;
+  alcAllowed @21 :Bool;
 
   enum Desire {
     none @0;
