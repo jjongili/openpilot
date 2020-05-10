@@ -43,7 +43,7 @@ def plannerd_thread(sm=None, pm=None):
     nlist = 0
     for s in sm.updated:
       nlist += 1
-      str_log = 'plannerd{}  s={}  alive={} valid={}'.format( nlist,  s, sm.alive[s],  sm.valid[s], sm.updated[s]  )
+      str_log = 'plannerd{}  s={}  alive={} valid={}  updated={}'.format( nlist,  s, sm.alive[s],  sm.valid[s], sm.updated[s]  )
       print(  str_log ) 
 
     if sm.updated['model']:
