@@ -322,6 +322,10 @@ class PathPlanner():
     plan_send.pathPlan.laneChangeDirection = self.lane_change_direction
     plan_send.pathPlan.alcAllowed = self.dragon_auto_lc_allowed
 
+    pm.send('pathPlan', plan_send)
+
+
+    print( 'pathplan = {}'.format( plan_send.valid) )
 
 
     if LOG_MPC:
