@@ -799,6 +799,7 @@ struct PathPlan {
   desire @17 :Desire;
   laneChangeState @18 :LaneChangeState;
   laneChangeDirection @19 :LaneChangeDirection;
+  laneChangeBSM @20 :LaneChangeBSM;
 
   # dragonpilot
   alcAllowed @20 :Bool;
@@ -822,6 +823,11 @@ struct PathPlan {
 
   enum LaneChangeDirection {
     none @0;
+    left @1;
+    right @2;
+  }
+  enum LaneChangeBSM {
+    off @0;
     left @1;
     right @2;
   }

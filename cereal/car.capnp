@@ -95,15 +95,20 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     speedTooHigh @70;
     laneChangeBlocked @71;
     relayMalfunction @72;
+    lkasButtonOff @73;
+    rightLCAbsm @74;
+    leftLCAbsm @75;
+    preventLCA @76;
+    turningIndicatorOn @77;
 
     # dp
-    preLaneChangeLeftALC @73;
-    preLaneChangeRightALC @74;
-    laneChangeALC @75;
-    manualSteeringRequired @76;
-    manualSteeringRequiredBlinkersOn @77;
-    leadCarMoving @78;
-    leadCarDetected @79;
+    preLaneChangeLeftALC @78;
+    preLaneChangeRightALC @79;
+    laneChangeALC @80;
+    manualSteeringRequired @81;
+    manualSteeringRequiredBlinkersOn @82;
+    leadCarMoving @83;
+    leadCarDetected @84;
   }
 }
 
@@ -162,12 +167,15 @@ struct CarState {
   # clutch (manual transmission only)
   clutchPressed @28 :Bool;
 
+  lcaLeft @33 :Bool;
+  lcaRight @34 :Bool;
+  
   # which packets this state came from
   canMonoTimes @12: List(UInt64);
 
   # blindspot sensors
-  leftBlindspot @33 :Bool; # Is there something blocking the left lane change
-  rightBlindspot @34 :Bool; # Is there something blocking the right lane change
+  leftBlindspot @35 :Bool; # Is there something blocking the left lane change
+  rightBlindspot @36 :Bool; # Is there something blocking the right lane change
 
   struct WheelSpeeds {
     # optional wheel speeds
@@ -393,6 +401,10 @@ struct CarParams {
   communityFeature @46: Bool;  # true if a community maintained feature is detected
   fingerprintSource @49: FingerprintSource;
   networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
+  mdpsBus @51: Int8;
+  sasBus @52: Int8;
+  sccBus @53: Int8;
+  autoLcaEnabled @54: Bool;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);
