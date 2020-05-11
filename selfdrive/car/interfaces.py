@@ -42,8 +42,6 @@ class CarInterfaceBase():
     self.dp_last_modified = None
     self.dp_gear_check = True
 
-    print( 'call class CarInterfaceBase():')
-
   @staticmethod
   def calc_accel_override(a_ego, a_target, v_ego, v_target):
     return 1.
@@ -67,6 +65,7 @@ class CarInterfaceBase():
     ret.steerControlType = car.CarParams.SteerControlType.torque
     ret.steerMaxBP = [0.]
     ret.steerMaxV = [1.]
+    ret.minSteerSpeed = 0.
 
     # stock ACC by default
     ret.enableCruise = True
@@ -135,14 +134,13 @@ class CarInterfaceBase():
     if cs_out.gasPressed and not self.dragon_allow_gas and not self.dragon_toyota_stock_dsu:
       events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
 
-    # TODO: move this stuff to the capnp strut
     if not self.dragon_lat_ctrl:
       events.append(create_event('manualSteeringRequired', [ET.WARNING]))
     elif self.dragon_enable_steering_on_signal and (cs_out.leftBlinker or cs_out.rightBlinker):
       events.append(create_event('manualSteeringRequiredBlinkersOn', [ET.WARNING]))
-    elif getattr(self.CS, "steer_error", False):
+    elif cs_out.steerError:
       events.append(create_event('steerUnavailable', [ET.NO_ENTRY, ET.IMMEDIATE_DISABLE, ET.PERMANENT]))
-    elif getattr(self.CS, "steer_warning", False):
+    elif cs_out.steerWarning:
       events.append(create_event('steerTempUnavailable', [ET.NO_ENTRY, ET.WARNING]))
 
     # Disable on rising edge of gas or brake. Also disable on brake when speed > 0.
@@ -157,8 +155,6 @@ class CarInterfaceBase():
         if cs_out.brakePressed and (not self.CS.out.gasPressed or not cs_out.standstill):
           events.append(create_event('pedalPressed', [ET.NO_ENTRY, ET.USER_DISABLE]))
 
-    #str_log = 'pcm_enable={} out={}  cs={}'.format( pcm_enable, cs_out.cruiseState.enabled, self.CS.out.cruiseState.enabled )
-    #print( str_log )
     # we engage when pcm is active (rising edge)
     if pcm_enable:
       if cs_out.cruiseState.enabled and not self.CS.out.cruiseState.enabled:

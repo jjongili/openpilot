@@ -124,7 +124,7 @@ ALERTS = [
       _("KEEP EYES ON ROAD"),
       _("Driver Appears Distracted"),
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1),
+      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarning2Repeat, .1, .1, .1),
 
   Alert(
       "driverDistracted",
@@ -145,7 +145,7 @@ ALERTS = [
       _("TOUCH STEERING WHEEL"),
       _("Driver Is Unresponsive"),
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1),
+      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarning2Repeat, .1, .1, .1),
 
   Alert(
       "driverUnresponsive",

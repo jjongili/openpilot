@@ -22,15 +22,31 @@ class CarInterface(CarInterfaceBase):
 
     ret.carName = "hyundai"
     ret.safetyModel = car.CarParams.SafetyModel.hyundai
-    #ret.radarOffCan = False
+    ret.radarOffCan = False
 
     # Hyundai port is a community feature for now
     ret.communityFeature = False
 
     ret.steerActuatorDelay = 0.1  # Default delay
-    ret.steerRateCost = 0.5
-    ret.steerLimitTimer = 0.4
-    tire_stiffness_factor = 1.
+    ret.steerRateCost = 0.45
+    ret.steerLimitTimer = 0.8
+    tire_stiffness_factor = 0.7
+
+    """
+      0.7.7
+      ret.steerActuatorDelay = 0.1  # Default delay   0.1
+      ret.steerRateCost = 0.5
+      ret.steerLimitTimer = 0.4
+      tire_stiffness_factor = 1
+    """
+
+    """
+      0.7.3
+      ret.steerActuatorDelay = 0.10  # Default delay   0.15
+      ret.steerRateCost = 0.45
+      ret.steerLimitTimer = 0.8
+      tire_stiffness_factor = 0.7
+    """
 
     if candidate == CAR.SANTA_FE:
       ret.lateralTuning.pid.kf = 0.00005
@@ -41,7 +57,6 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.82
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[9., 22.], [9., 22.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2, 0.35], [0.05, 0.09]]
-      ret.minSteerSpeed = 0.
     elif candidate == CAR.SONATA:
       ret.lateralTuning.pid.kf = 0.00005
       ret.mass = 1513. + STD_CARGO_KG
@@ -49,7 +64,6 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 13.27 * 1.15   # 15% higher at the center seems reasonable
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
-      ret.minSteerSpeed = 0.
     elif candidate == CAR.PALISADE:
       ret.lateralTuning.pid.kf = 0.00005
       ret.mass = 1999. + STD_CARGO_KG
@@ -58,13 +72,13 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
     elif candidate == CAR.GRANDEUR_HYBRID:
-      ret.lateralTuning.pid.kf = 0.00005
+      ret.lateralTuning.pid.kf = 0.00004
       ret.mass = 1675. + STD_CARGO_KG
       ret.wheelbase = 2.845
       ret.steerRatio = 12.0  #12.5
-      ret.steerRateCost = 0.4 #0.4
-      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]      
+      ret.steerRateCost = 0.45 #0.4
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[9., 22.], [9., 22.]]  # 40, 80
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.18,0.18], [0.02,0.05]]
     elif candidate == CAR.KIA_SORENTO:
       ret.lateralTuning.pid.kf = 0.00005
       ret.mass = 1985. + STD_CARGO_KG
@@ -72,13 +86,12 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 14.4 * 1.1   # 10% higher at the center seems reasonable
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
-      ret.minSteerSpeed = 0.
     elif candidate in [CAR.ELANTRA, CAR.ELANTRA_GT_I30]:
       ret.lateralTuning.pid.kf = 0.00006
       ret.mass = 1275. + STD_CARGO_KG
       ret.wheelbase = 2.7
-      ret.steerRatio = 13.73   #Spec
-      tire_stiffness_factor = 0.385
+      ret.steerRatio = 15.4            # 14 is Stock | Settled Params Learner values are steerRatio: 15.401566348670535
+      tire_stiffness_factor = 0.385    # stiffnessFactor settled on 1.0081302973865127
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
       ret.minSteerSpeed = 32 * CV.MPH_TO_MS
@@ -111,7 +124,6 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 14.4 * 1.15   # 15% higher at the center seems reasonable
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
-      ret.minSteerSpeed = 0.
     elif candidate == CAR.KONA:
       ret.lateralTuning.pid.kf = 0.00006
       ret.mass = 1275. + STD_CARGO_KG

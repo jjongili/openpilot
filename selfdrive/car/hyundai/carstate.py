@@ -15,9 +15,9 @@ class CarState(CarStateBase):
   def update(self, cp, cp_cam):
     ret = car.CarState.new_message()
 
-    ret.doorOpen = False
-    #ret.doorOpen = any([cp.vl["CGW1"]['CF_Gway_DrvDrSw'],cp.vl["CGW1"]['CF_Gway_AstDrSw'],
-    #                    cp.vl["CGW2"]['CF_Gway_RLDrSw'], cp.vl["CGW2"]['CF_Gway_RRDrSw']])
+    #ret.doorOpen = False
+    ret.doorOpen = any([cp.vl["CGW1"]['CF_Gway_DrvDrSw'],cp.vl["CGW1"]['CF_Gway_AstDrSw'],
+                        cp.vl["CGW2"]['CF_Gway_RLDrSw'], cp.vl["CGW2"]['CF_Gway_RRDrSw']])
 
     ret.seatbeltUnlatched = cp.vl["CGW1"]['CF_Gway_DrvSeatBeltSw'] == 0
 
@@ -38,7 +38,7 @@ class CarState(CarStateBase):
     ret.steeringTorque = cp.vl["MDPS12"]['CR_Mdps_StrColTq']
     ret.steeringTorqueEps = cp.vl["MDPS12"]['CR_Mdps_OutTq']
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
-
+    ret.steerWarning = cp.vl["MDPS12"]['CF_Mdps_ToiUnavail'] != 0
     # cruise state
     ret.cruiseState.available = True
     #ret.cruiseState.enabled = cp.vl["SCC12"]['ACCMode'] != 0
@@ -66,13 +66,8 @@ class CarState(CarStateBase):
     ret.brakeLights = bool(cp.vl["TCS13"]['BrakeLight'] or ret.brakePressed)
 
     #TODO: find pedal signal for EV/HYBRID Cars
-    if (cp.vl["TCS13"]["DriverOverride"] == 0 and cp.vl["TCS13"]['ACC_REQ'] == 1):
-      pedal_gas = 0
-    else:
-      pedal_gas = cp.vl["EMS12"]['TPS']
-
-    ret.gasPressed = pedal_gas > 1e-3
-    ret.gas = pedal_gas
+    ret.gas = cp.vl["EMS12"]['PV_AV_CAN'] / 100
+    ret.gasPressed = bool(cp.vl["EMS16"]["CF_Ems_AclAct"])
 
 
     #str_log = 'carstate.py  out={}  ACCMode={} MainMode_ACC={}'.format( ret.cruiseState.enabled, cp.vl["SCC12"]['ACCMode'], cp.vl["SCC11"]["MainMode_ACC"]  )
@@ -135,7 +130,6 @@ class CarState(CarStateBase):
     self.mdps12 = cp.vl["MDPS12"]
     self.park_brake = cp.vl["CGW1"]['CF_Gway_ParkBrakeSw']
     self.steer_state = cp.vl["MDPS12"]['CF_Mdps_ToiActive'] #0 NOT ACTIVE, 1 ACTIVE
-    self.steer_warning = cp.vl["MDPS12"]['CF_Mdps_ToiUnavail']
     self.lead_distance = cp.vl["SCC11"]['ACC_ObjDist']
 
   
@@ -155,10 +149,10 @@ class CarState(CarStateBase):
       ("CF_Gway_DrvSeatBeltInd", "CGW4", 1),
 
       ("CF_Gway_DrvSeatBeltSw", "CGW1", 0),
-      #("CF_Gway_DrvDrSw", "CGW1", 0),       # Driver Door
-      #("CF_Gway_AstDrSw", "CGW1", 0),       # Passenger door
-      #("CF_Gway_RLDrSw", "CGW2", 0),        # Rear reft door
-      #("CF_Gway_RRDrSw", "CGW2", 0),        # Rear right door
+      ("CF_Gway_DrvDrSw", "CGW1", 0),       # Driver Door
+      ("CF_Gway_AstDrSw", "CGW1", 0),       # Passenger door
+      ("CF_Gway_RLDrSw", "CGW2", 0),        # Rear reft door
+      ("CF_Gway_RRDrSw", "CGW2", 0),        # Rear right door
       ("CF_Gway_TSigLHSw", "CGW1", 0),
       ("CF_Gway_TurnSigLh", "CGW1", 0),
       ("CF_Gway_TSigRHSw", "CGW1", 0),
@@ -185,10 +179,8 @@ class CarState(CarStateBase):
       ("CF_Clu_AliveCnt1", "CLU11", 0),
 
       ("ACCEnable", "TCS13", 0),
-      ("ACC_REQ", "TCS13", 0),
       ("BrakeLight", "TCS13", 0),
       ("DriverBraking", "TCS13", 0),
-      ("DriverOverride", "TCS13", 0),
 
       ("ESC_Off_Step", "TCS15", 0),
 
@@ -240,7 +232,8 @@ class CarState(CarStateBase):
       ("CR_VSM_Alive", "SCC12", 0),
       ("CR_VSM_ChkSum", "SCC12", 0),
 
-      ("TPS", "EMS12", 0),
+      ("PV_AV_CAN", "EMS12", 0),
+      ("CF_Ems_AclAct", "EMS16", 0),
 
     ]
 
@@ -260,6 +253,7 @@ class CarState(CarStateBase):
       ("SCC11", 50),
       ("SCC12", 50),
       #("EMS12", 100),
+      #("EMS16", 100),
     ]
     if CP.carFingerprint in FEATURES["use_cluster_gears"]:
       signals += [
