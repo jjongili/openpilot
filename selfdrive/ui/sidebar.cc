@@ -32,11 +32,11 @@ static void ui_draw_sidebar_home_button(UIState *s) {
     nvgFill(s->vg);
 
     nvgFillColor(s->vg, nvgRGBA(0, 0, 0, s->scene.alert_rate));
-    nvgFontSize(s->vg, (strcmp(s->dragon_locale, "zh-TW") == 0? 60 : strcmp(s->dragon_locale, "zh-CN") == 0? 60 : 46));
+    nvgFontSize(s->vg, (strcmp(s->dragon_locale, "ko-KR") == 0? 60 : 46));
     nvgFontFaceId(s->vg, s->font_sans_bold);
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
     nvgTextBox(s->vg, home_btn_xr, home_btn_y + home_btn_h/2, home_btn_w,
-      (strcmp(s->dragon_locale, "zh-TW") == 0? "更新中" : strcmp(s->dragon_locale, "zh-CN") == 0? "更新中" : "UPDATING"),
+      (strcmp(s->dragon_locale, "ko-KR") == 0? "업데이트중" : "UPDATING"),
       NULL);
 
     s->scene.alert_rate += 5*s->scene.alert_type;
@@ -192,7 +192,7 @@ static void ui_draw_sidebar_temp_metric(UIState *s) {
   snprintf(temp_value_str, sizeof(temp_value_str), "%d", s->scene.paTemp);
   snprintf(temp_value_unit, sizeof(temp_value_unit), "%s", "°C");
   snprintf(temp_label_str, sizeof(temp_label_str), "%s",
-  (strcmp(s->dragon_locale, "zh-TW") == 0? "溫度" : strcmp(s->dragon_locale, "zh-CN") == 0? "温度" : "TEMP"));
+  (strcmp(s->dragon_locale, "ko-KR") == 0? "온도" : "TEMP"));
   strcat(temp_value_str, temp_value_unit);
 
   ui_draw_sidebar_metric(s, temp_label_str, temp_value_str, temp_severity, temp_y_offset, NULL);
@@ -206,11 +206,11 @@ static void ui_draw_sidebar_panda_metric(UIState *s) {
   if (s->scene.hwType == cereal_HealthData_HwType_unknown) {
     panda_severity = 2;
     snprintf(panda_message_str, sizeof(panda_message_str),
-    (strcmp(s->dragon_locale, "zh-TW") == 0? "PANDA\n未連線" : strcmp(s->dragon_locale, "zh-CN") == 0? "PANDA\n未连线" : "PANDA\nN/A"));
+    (strcmp(s->dragon_locale, "ko-KR") == 0? "PANDA\n연결안됨" : "PANDA\nN/A"));
   } else if (s->scene.hwType == cereal_HealthData_HwType_whitePanda) {
     panda_severity = 0;
     snprintf(panda_message_str, sizeof(panda_message_str), "%s",
-    (strcmp(s->dragon_locale, "zh-TW") == 0? "PANDA\n已連線" : strcmp(s->dragon_locale, "zh-CN") == 0? "PANDA\n已连线" : "PANDA\nACTIVE"));
+    (strcmp(s->dragon_locale, "ko-KR") == 0? "PANDA\n연결됨" : "PANDA\nACTIVE"));
   } else if (
       (s->scene.hwType == cereal_HealthData_HwType_greyPanda) ||
       (s->scene.hwType == cereal_HealthData_HwType_blackPanda) ||
@@ -225,7 +225,7 @@ static void ui_draw_sidebar_panda_metric(UIState *s) {
         }
       }
       snprintf(panda_message_str, sizeof(panda_message_str), "%s %d",
-      (strcmp(s->dragon_locale, "zh-TW") == 0? "PANDA\nGPS:" : strcmp(s->dragon_locale, "zh-CN") == 0? "PANDA\nGPS:" : "PANDA\nGPS:"),
+      (strcmp(s->dragon_locale, "ko-KR") == 0? "PANDA\nGPS:" : "PANDA\nGPS:"),
       s->scene.satelliteCount);
   }
 
@@ -234,13 +234,13 @@ static void ui_draw_sidebar_panda_metric(UIState *s) {
 static void ui_draw_sidebar_connectivity(UIState *s) {
   if (s->scene.athenaStatus == NET_DISCONNECTED) {
     ui_draw_sidebar_metric(s, NULL, NULL, 1, 180+158,
-    (strcmp(s->dragon_locale, "zh-TW") == 0? "CONNECT\n已離線" : strcmp(s->dragon_locale, "zh-CN") == 0? "CONNECT\n已离线" : "CONNECT\nOFFLINE"));
+    (strcmp(s->dragon_locale, "ko-KR") == 0? "CONNECT\n오프라인" : "CONNECT\nOFFLINE"));
   } else if (s->scene.athenaStatus == NET_CONNECTED) {
     ui_draw_sidebar_metric(s, NULL, NULL, 0, 180+158,
-    (strcmp(s->dragon_locale, "zh-TW") == 0? "CONNECT\n已連線" : strcmp(s->dragon_locale, "zh-CN") == 0? "CONNECT\n已连线" : "CONNECT\nONLINE"));
+    (strcmp(s->dragon_locale, "ko-KR") == 0? "CONNECT\n온라인" : "CONNECT\nONLINE"));
   } else {
     ui_draw_sidebar_metric(s, NULL, NULL, 2, 180+158,
-    (strcmp(s->dragon_locale, "zh-TW") == 0? "CONNECT\n錯誤" : strcmp(s->dragon_locale, "zh-CN") == 0? "CONNECT\n错误" : "CONNECT\nERROR"));
+    (strcmp(s->dragon_locale, "ko-KR") == 0? "CONNECT\n에러" : "CONNECT\nERROR"));
   }
 }
 

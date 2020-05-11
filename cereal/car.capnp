@@ -19,6 +19,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
   immediateDisable @6 :Bool;
   preEnable @7 :Bool;
   permanent @8 :Bool;
+  resetVCruise @9 :Bool;
 
   enum EventName @0xbaa8c5d505f727de {
     # TODO: copy from error list
@@ -158,6 +159,8 @@ struct CarState {
   leftBlinker @20 :Bool;
   rightBlinker @21 :Bool;
   genericToggle @23 :Bool;
+  distanceToggle @33 :Float32;
+  laneDepartureToggle @34 :Bool;
 
   # lock info
   doorOpen @24 :Bool;
@@ -167,15 +170,18 @@ struct CarState {
   # clutch (manual transmission only)
   clutchPressed @28 :Bool;
 
-  lcaLeft @33 :Bool;
-  lcaRight @34 :Bool;
+  readdistancelines @36 :Float32;
+  lkMode @35 :Bool;
   
+  lcaLeft @39 :Bool;
+  lcaRight @40 :Bool;
+
   # which packets this state came from
   canMonoTimes @12: List(UInt64);
 
   # blindspot sensors
-  leftBlindspot @35 :Bool; # Is there something blocking the left lane change
-  rightBlindspot @36 :Bool; # Is there something blocking the right lane change
+  leftBlindspot @37 :Bool; # Is there something blocking the left lane change
+  rightBlindspot @38 :Bool; # Is there something blocking the right lane change
 
   struct WheelSpeeds {
     # optional wheel speeds
@@ -330,6 +336,14 @@ struct CarControl {
       chimeWarning2 @5;
       chimeWarningRepeat @6;
       chimePrompt @7;
+      chimeReady @8;
+      chimeDoorOpen @9;
+      chimeGearDrive @10;
+      chimeLaneChange @11;
+      chimeLaneDeparture @12;
+      chimeRoadWarning @13;
+      chimeSeatBelt @14;
+      chimeViewUncertain @15;
     }
   }
 }
@@ -404,7 +418,7 @@ struct CarParams {
   mdpsBus @51: Int8;
   sasBus @52: Int8;
   sccBus @53: Int8;
-  autoLcaEnabled @54: Bool;
+  autoLcaEnabled @54: Int8;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);

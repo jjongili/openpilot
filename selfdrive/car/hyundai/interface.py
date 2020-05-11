@@ -187,6 +187,8 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
 
+    ret.minEnableSpeed = -1.   # enable is done by stock ACC, so ignore this
+
     ret.centerToFront = ret.wheelbase * 0.4
 
     # TODO: get actual value, for now starting with reasonable value for
@@ -231,7 +233,7 @@ class CarInterface(CarInterfaceBase):
                                                                      else 2 if 1056 in fingerprint[2] else -1
     ret.radarOffCan = ret.sccBus == -1
     ret.openpilotLongitudinalControl = bool(ret.sccBus and not ret.radarOffCan)
-    ret.autoLcaEnabled = False
+    ret.autoLcaEnabled = 1
 
     return ret
 
@@ -302,9 +304,9 @@ class CarInterface(CarInterfaceBase):
     if self.turning_indicator_alert:
       events.append(create_event('turningIndicatorOn', [ET.WARNING]))
     #TODO Varible for min Speed for LCA
-    if ret.rightBlinker and ret.lcaRight and ret.vEgo > (45 * CV.MPH_TO_MS):
+    if ret.rightBlinker and ret.lcaRight and ret.vEgo > (60 * CV.KPH_TO_MS):
       events.append(create_event('rightLCAbsm', [ET.WARNING]))
-    if ret.leftBlinker and ret.lcaLeft and ret.vEgo > (45 * CV.MPH_TO_MS):
+    if ret.leftBlinker and ret.lcaLeft and ret.vEgo > (60 * CV.KPH_TO_MS):
       events.append(create_event('leftLCAbsm', [ET.WARNING]))
 
     ret.events = events

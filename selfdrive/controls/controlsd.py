@@ -38,7 +38,7 @@ HwType = log.HealthData.HwType
 
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
-
+LaneChangeBSM = log.PathPlan.LaneChangeBSM
 
 def add_lane_change_event(events, path_plan):
   postfix = 'ALC' if path_plan.alcAllowed else ''
@@ -85,6 +85,7 @@ def data_sample(CI, CC, sm, can_sock, state, mismatch_counter, can_error_counter
   events += list(sm['dMonitoringState'].events)
   add_lane_change_event(events, sm['pathPlan'])
   enabled = isEnabled(state)
+  lane_change_bsm = sm['pathPlan'].laneChangeBSM
 
   # Check for CAN timeout
   if not can_strs:
@@ -96,6 +97,12 @@ def data_sample(CI, CC, sm, can_sock, state, mismatch_counter, can_error_counter
   low_battery = sm['thermal'].batteryPercent < 1 and sm['thermal'].chargingError  # at zero percent battery, while discharging, OP should not allowed
   mem_low = sm['thermal'].memUsedPercent > 90
 
+  #bsm alerts
+  if lane_change_bsm == LaneChangeBSM.left:
+      events.append(create_event('preventLCA', [ET.WARNING]))
+  if lane_change_bsm == LaneChangeBSM.right:
+      events.append(create_event('preventLCA', [ET.WARNING]))
+  
   # Create events for battery, temperature and disk space
   if low_battery:
     events.append(create_event('lowBattery', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
@@ -119,7 +126,7 @@ def data_sample(CI, CC, sm, can_sock, state, mismatch_counter, can_error_counter
     else:
       events.append(create_event('calibrationInvalid', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
 
-  if CS.vEgo > 92 * CV.MPH_TO_MS:
+  if CS.vEgo > 150 * CV.KPH_TO_MS:
     events.append(create_event('speedTooHigh', [ET.NO_ENTRY, ET.SOFT_DISABLE]))
 
   # When the panda and controlsd do not agree on controls_allowed
@@ -555,6 +562,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
   dp_last_modified = None
   dp_camera_offset = CAMERA_OFFSET
 
+  hyundai_lkas = read_only
   while True:
     start_time = sec_since_boot()
 
@@ -581,6 +589,13 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
 
     # Sample data and compute car events
     CS, events, cal_perc, mismatch_counter, can_error_counter = data_sample(CI, CC, sm, can_sock, state, mismatch_counter, can_error_counter, params, dragon_toyota_stock_dsu)
+
+    if read_only:
+      hyundai_lkas = read_only
+    elif CS.cruiseState.enabled:
+#    elif state == State.enabled:
+      hyundai_lkas = False
+
     prof.checkpoint("Sample")
 
 
@@ -657,7 +672,7 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
       if CS.vEgo > 0.:
         dragon_stopped_has_lead_count = 0
 
-    if not read_only:
+    if not hyundai_lkas:
       # update control state
       state, soft_disable_timer, v_cruise_kph, v_cruise_kph_last = \
         state_transition(sm.frame, CS, CP, state, events, soft_disable_timer, v_cruise_kph, AM)
@@ -666,19 +681,22 @@ def controlsd_thread(sm=None, pm=None, can_sock=None):
     # Compute actuators (runs PID loops and lateral MPC)
     actuators, v_cruise_kph, v_acc, a_acc, lac_log, last_blinker_frame, saturated_count = \
       state_control(sm.frame, sm.rcv_frame, sm['plan'], sm['pathPlan'], CS, CP, state, events, v_cruise_kph, v_cruise_kph_last, AM, rk,
-                    LaC, LoC, read_only, is_metric, cal_perc, last_blinker_frame, saturated_count, dragon_lat_control, dragon_display_steering_limit_alert, dragon_lead_car_moving_alert)
+                    LaC, LoC, hyundai_lkas, is_metric, cal_perc, last_blinker_frame, saturated_count, dragon_lat_control, dragon_display_steering_limit_alert, dragon_lead_car_moving_alert)
 
     prof.checkpoint("State Control")
 
     # Publish data
     CC, events_prev = data_send(sm, pm, CS, CI, CP, VM, state, events, actuators, v_cruise_kph, rk, AM, LaC,
-                                LoC, read_only, start_time, v_acc, a_acc, lac_log, events_prev, last_blinker_frame,
+                                LoC, hyundai_lkas, start_time, v_acc, a_acc, lac_log, events_prev, last_blinker_frame,
                                 is_ldw_enabled, can_error_counter, dp_camera_offset)
     prof.checkpoint("Sent")
 
     rk.monitor_time()
     prof.display()
 
+    if not CS.cruiseState.enabled:
+#    if state == State.disabled:
+      hyundai_lkas = True
 
 def main(sm=None, pm=None, logcan=None):
   controlsd_thread(sm, pm, logcan)

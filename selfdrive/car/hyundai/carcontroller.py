@@ -55,7 +55,6 @@ def process_hud_alert(enabled, fingerprint, visual_alert, left_lane,
 
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
-
 class CarController():
   def __init__(self, dbc_name, CP, VM):
     self.car_fingerprint = CP.carFingerprint
@@ -103,7 +102,6 @@ class CarController():
     apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, SteerLimitParams)
     self.steer_rate_limited = new_steer != apply_steer
 
-    # disable if steer angle reach 90 deg, otherwise mdps fault in some models
     lkas_active = enabled
 
     # Disable steering while turning blinker on and speed below 60 kph
@@ -112,12 +110,14 @@ class CarController():
         self.turning_signal_timer = 100  # Disable for 1.0 Seconds after blinker turned off
       elif CS.left_blinker_flash or CS.right_blinker_flash: # Optima has blinker flash signal only
         self.turning_signal_timer = 100
-    if self.turning_signal_timer and CS.out.vEgo < 16.7:
+    if self.turning_signal_timer and CS.out.vEgo < 16.666667:
       lkas_active = 0
     if self.turning_signal_timer:
       self.turning_signal_timer -= 1
     if not lkas_active:
       apply_steer = 0
+      
+    steer_req = 1 if apply_steer else 0
 
     self.apply_accel_last = apply_accel
     self.apply_steer_last = apply_steer
@@ -190,4 +190,3 @@ class CarController():
       can_sends.append(create_lfa_mfa(self.packer, frame, enabled))
 
     return can_sends
-
