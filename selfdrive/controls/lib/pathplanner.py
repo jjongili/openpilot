@@ -18,7 +18,7 @@ LaneChangeDirection = log.PathPlan.LaneChangeDirection
 
 LOG_MPC = os.environ.get('LOG_MPC', False)
 
-LANE_CHANGE_SPEED_MIN = 45 * CV.MPH_TO_MS
+LANE_CHANGE_SPEED_MIN = 37.282272 * CV.MPH_TO_MS
 LANE_CHANGE_TIME_MAX = 10.
 
 DESIRES = {
@@ -71,8 +71,8 @@ class PathPlanner():
     self.dragon_auto_lc_allowed = False
     self.dragon_auto_lc_timer = None
     self.dragon_assisted_lc_min_mph = LANE_CHANGE_SPEED_MIN
-    self.dragon_auto_lc_min_mph = 60 * CV.MPH_TO_MS
-    self.dragon_auto_lc_delay = 2.
+    self.dragon_auto_lc_min_mph = 37.282272 * CV.MPH_TO_MS
+    self.dragon_auto_lc_delay = 1.
     self.last_ts = 0.
     self.dp_last_modified = None
     self.dp_enable_sr_boost = False
@@ -110,7 +110,7 @@ class PathPlanner():
           try:
             self.dragon_assisted_lc_min_mph = float(self.params.get("DragonAssistedLCMinMPH", encoding='utf8'))
           except (TypeError, ValueError):
-            self.dragon_assisted_lc_min_mph = 45
+            self.dragon_assisted_lc_min_mph = 37.282272
           self.dragon_assisted_lc_min_mph *= CV.MPH_TO_MS
           if self.dragon_assisted_lc_min_mph < 0:
             self.dragon_assisted_lc_min_mph = 0
@@ -119,7 +119,7 @@ class PathPlanner():
             try:
               self.dragon_auto_lc_min_mph = float(self.params.get("DragonAutoLCMinMPH", encoding='utf8'))
             except (TypeError, ValueError):
-              self.dragon_auto_lc_min_mph = 60
+              self.dragon_auto_lc_min_mph = 37.282272
             self.dragon_auto_lc_min_mph *= CV.MPH_TO_MS
             if self.dragon_auto_lc_min_mph < 0:
               self.dragon_auto_lc_min_mph = 0
@@ -130,7 +130,7 @@ class PathPlanner():
             try:
               self.dragon_auto_lc_delay = float(self.params.get("DragonAutoLCDelay", encoding='utf8'))
             except (TypeError, ValueError):
-              self.dragon_auto_lc_delay = 2.
+              self.dragon_auto_lc_delay = 1.
             if self.dragon_auto_lc_delay < 0:
               self.dragon_auto_lc_delay = 0
         else:
