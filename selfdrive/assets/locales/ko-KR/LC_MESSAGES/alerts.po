@@ -19,7 +19,7 @@ msgstr ""
 
 #: controls/lib/alerts.py:82 controls/lib/alerts.py:89
 msgid "BRAKE!"
-msgstr "브레이크"
+msgstr "브레이크!"
 
 #: controls/lib/alerts.py:83 controls/lib/alerts.py:90
 msgid "Risk of Collision"
@@ -43,7 +43,7 @@ msgstr "조향제어가 일시적으로 비활성화 되었습니다"
 
 #: controls/lib/alerts.py:117
 msgid "KEEP EYES ON ROAD: Driver Distracted"
-msgstr "도로상황에 주의를 기울이세요 : 주행 산만"
+msgstr "도로상황에 주의를 기울이세요: 주행 산만"
 
 #: controls/lib/alerts.py:124
 msgid "KEEP EYES ON ROAD"
@@ -127,7 +127,7 @@ msgstr "대시캠모드(지원되지 않는 차량)"
 #: controls/lib/alerts.py:491 controls/lib/alerts.py:498
 #: controls/lib/alerts.py:505 controls/lib/alerts.py:512
 msgid "TAKE CONTROL IMMEDIATELY"
-msgstr "핸들을 잡아주세요"
+msgstr "핸들을 즉시 잡아주세요"
 
 #: controls/lib/alerts.py:202
 msgid "Ethical Dilemma Detected"
@@ -228,7 +228,7 @@ msgstr "주차 브레이크 해제 필요"
 #: controls/lib/alerts.py:321 controls/lib/alerts.py:478
 #: controls/lib/alerts.py:642
 msgid "Cruise Fault: Restart the Car"
-msgstr "크루즈 기능 오류: 다시 시작하세요"
+msgstr "크루즈 기능 오류: 차량을 다시 시작하세요"
 
 #: controls/lib/alerts.py:328 controls/lib/alerts.py:406
 msgid "Low Battery"
