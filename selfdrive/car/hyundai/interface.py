@@ -253,7 +253,7 @@ class CarInterface(CarInterfaceBase):
     ret.rightBlinker = True if (self.CS.right_blinker_flash or self.CS.prev_right_blinker and self.CC.turning_signal_timer ) else False
 
     # turning indicator alert logic
-    if (ret.leftBlinker or ret.rightBlinker or self.CC.turning_signal_timer) and ret.vEgo < 16.666667:
+    if (ret.leftBlinker or ret.rightBlinker or self.CC.turning_signal_timer) and ret.vEgo < 20.1168:
       self.turning_indicator_alert = True 
     else:
       self.turning_indicator_alert = False
@@ -304,9 +304,9 @@ class CarInterface(CarInterfaceBase):
     if self.turning_indicator_alert:
       events.append(create_event('turningIndicatorOn', [ET.WARNING]))
     #TODO Varible for min Speed for LCA
-    if ret.rightBlinker and ret.lcaRight and ret.vEgo > (60 * CV.KPH_TO_MS):
+    if ret.rightBlinker and ret.lcaRight and ret.vEgo > (45 * CV.MPH_TO_MS):
       events.append(create_event('rightLCAbsm', [ET.WARNING]))
-    if ret.leftBlinker and ret.lcaLeft and ret.vEgo > (60 * CV.KPH_TO_MS):
+    if ret.leftBlinker and ret.lcaLeft and ret.vEgo > (45 * CV.MPH_TO_MS):
       events.append(create_event('leftLCAbsm', [ET.WARNING]))
 
     ret.events = events
