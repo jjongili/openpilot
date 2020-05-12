@@ -30,25 +30,6 @@ int hyundai_mdps_bus = 0;
 bool hyundai_LCAN_on_bus1 = false;
 bool hyundai_forward_bus1 = false;
 
-static uint8_t hyundai_get_counter(CAN_FIFOMailBox_TypeDef *to_push) {
-  int addr = GET_ADDR(to_push);
-
-  uint8_t cnt;
-  if (addr == 608) {
-    cnt = (GET_BYTE(to_push, 7) >> 4) & 0x3;
-  } else if (addr == 897) {
-    cnt = GET_BYTE(to_push, 5);
-  } else if (addr == 902) {
-    cnt = (GET_BYTE(to_push, 1) >> 6) & 0x3;
-  } else if (addr == 916) {
-    cnt = (GET_BYTE(to_push, 1) >> 5) & 0x7;
-  } else if (addr == 1057) {
-    cnt = GET_BYTE(to_push, 7) & 0xF;
-  } else {
-    cnt = 0;
-  }
-  return cnt;
-}
 
 static int hyundai_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
@@ -130,7 +111,6 @@ static int hyundai_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       hyundai_speed = GET_BYTES_04(to_push) & 0x3FFF;  // FL
       hyundai_speed += (GET_BYTES_48(to_push) >> 16) & 0x3FFF;  // RL
       hyundai_speed /= 2;
-      vehicle_moving = hyundai_speed > HYUNDAI_STANDSTILL_THRSLD;
     }
 
     // exit controls on rising edge of brake press for cars with long control
