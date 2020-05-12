@@ -123,20 +123,6 @@ ALERTS = [
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, .2, .2),
 
   Alert(
-      "manualSteeringRequired",
-      "핸들을 잡아주세요: 차선유지기능 꺼짐",
-      "",
-      AlertStatus.normal, AlertSize.small,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
-
-  Alert(
-      "manualSteeringRequiredBlinkersOn",
-      "핸들을 잡아주세요: 턴 시그널 켜짐",
-      "",
-      AlertStatus.normal, AlertSize.small,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
-
-  Alert(
       "preDriverDistracted",
       "도로상황에 주의를 기울이세요 : 주행 산만",
       "",
@@ -230,7 +216,7 @@ ALERTS = [
   Alert(
       "steerTempUnavailableNoEntry",
       "오픈파일럿 사용 불가",
-      "조향 제어가 일시적으로 비활성화 되었습니다.",
+      "조향 제어가 일시적으로 비활성화 되었습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 0., 3.),
 
@@ -853,8 +839,8 @@ ALERTS = [
 
   Alert(
       "relayMalfunctionPermanent",
-      "Harness Malfunction",
-      "Please Check Hardware",
+      "하네스 오작동",
+      "하드웨어를 점검하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
@@ -871,4 +857,51 @@ ALERTS = [
       "차선 이탈 감지",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeLaneDeparture, 4., 2., 3.),
+  # dp
+  Alert(
+      "preLaneChangeLeftALC",
+      "3초안에 좌측 차선변경을 시작합니다",
+      "다른차량에 주의하세요",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1, alert_rate=0.75),
+
+  Alert(
+      "preLaneChangeRightALC",
+      "3초안에 우측 차선변경을 시작합니다",
+      "다른 차량에 주의하세요",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1, alert_rate=0.75),
+
+  Alert(
+      "laneChangeALC",
+      "차선 변경 중",
+      "다른 차량에 주의하세요",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1),
+
+  Alert(
+      "manualSteeringRequired",
+      "핸들을 잡아주세요: 차선유지기능 꺼짐",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
+
+  Alert(
+      "manualSteeringRequiredBlinkersOn",
+      "핸들을 잡아주세요: 턴 시그널 켜짐",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
+  Alert(
+      "leadCarMoving",
+      "선행차량이 출발했습니다",
+      "",
+      AlertStatus.userPrompt, AlertSize.small,
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1),
+  Alert(
+      "leadCarDetected",
+      "선행차량 감지됨",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
 ]
