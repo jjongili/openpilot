@@ -60,455 +60,489 @@ class Alert():
 
 
 ALERTS = [
+  Alert(
+      "turningIndicatorOn",
+      "턴 시그널 작동 중 핸들을 잡아주세요",
+      "",
+      AlertStatus.userPrompt, AlertSize.small,
+      Priority.HIGH, VisualAlert.none, AudibleAlert.none, 0., 0., .1),
+  Alert(
+      "lkasButtonOff",
+      "오픈파일럿 사용을 위해 차량의 LKAS 버튼을 눌러주세요",
+      "",
+      AlertStatus.userPrompt, AlertSize.small,
+      Priority.HIGH, VisualAlert.none, AudibleAlert.none, 0., 0., .1),
   # Miscellaneous alerts
   Alert(
       "enable",
       "",
       "",
       AlertStatus.normal, AlertSize.none,
-      Priority.MID, VisualAlert.none, AudibleAlert.chimeEngage, .2, 0., 0.),
+      Priority.MID, VisualAlert.none, AudibleAlert.chimeEngage, 2., 0., 0.),
 
   Alert(
       "disable",
       "",
       "",
       AlertStatus.normal, AlertSize.none,
-      Priority.MID, VisualAlert.none, AudibleAlert.chimeDisengage, .2, 0., 0.),
+      Priority.MID, VisualAlert.none, AudibleAlert.chimeDisengage, 2., 0., 0.),
 
   Alert(
       "fcw",
-      _("BRAKE!"),
-      _("Risk of Collision"),
+      "브레이크!",
+      "추돌 위험",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.fcw, AudibleAlert.chimeWarningRepeat, 1., 2., 2.),
 
   Alert(
       "fcwStock",
-      _("BRAKE!"),
-      _("Risk of Collision"),
+      "브레이크!",
+      "추돌 위험",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.fcw, AudibleAlert.none, 1., 2., 2.),  # no EON chime for stock FCW
 
   Alert(
       "steerSaturated",
-      _("TAKE CONTROL"),
-      _("Turn Exceeds Steering Limit"),
+      "핸들을 잡아주세요",
+      "스티어링 토크가 높습니다",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 2., 3.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, 1., 2., 3.),
 
   Alert(
       "steerTempUnavailable",
-      _("TAKE CONTROL"),
-      _("Steering Temporarily Unavailable"),
+      "핸들을 잡아주세요",
+      "조향제어가 일시적으로 비활성화 되었습니다",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning1, .4, 2., 3.),
 
   Alert(
       "steerTempUnavailableMute",
-      _("TAKE CONTROL"),
-      _("Steering Temporarily Unavailable"),
+      "핸들을 잡아주세요",
+      "조향제어가 일시적으로 비활성화 되었습니다",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .2, .2, .2),
 
   Alert(
       "preDriverDistracted",
-      _("KEEP EYES ON ROAD: Driver Distracted"),
+      "도로상황에 주의를 기울이세요 : 주행 산만",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
 
   Alert(
       "promptDriverDistracted",
-      _("KEEP EYES ON ROAD"),
-      _("Driver Appears Distracted"),
+      "도로상황에 주의하세요",
+      "주행 산만",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarning2Repeat, .1, .1, .1),
+      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeRoadWarning, 3., .1, .1),
 
   Alert(
       "driverDistracted",
-      _("DISENGAGE IMMEDIATELY"),
-      _("Driver Was Distracted"),
+      "경고: 조향제어가 즉시 해제됩니다",
+      "주행 산만",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGH, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, .1, .1),
 
   Alert(
       "preDriverUnresponsive",
-      _("TOUCH STEERING WHEEL: No Face Detected"),
+      "핸들을 터치하세요: 모니터링 없음",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
 
   Alert(
       "promptDriverUnresponsive",
-      _("TOUCH STEERING WHEEL"),
-      _("Driver Is Unresponsive"),
+      "핸들을 터치하세요",
+      "운전자 모니터링 없음",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarning2Repeat, .1, .1, .1),
+      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1),
 
   Alert(
       "driverUnresponsive",
-      _("DISENGAGE IMMEDIATELY"),
-      _("Driver Was Unresponsive"),
+      "경고: 조향제어가 즉시 해제됩니다",
+      "운전자 모니터링 없음",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGH, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, .1, .1),
 
   Alert(
       "driverMonitorLowAcc",
-      _("CHECK DRIVER FACE VISIBILITY"),
-      _("Driver Monitor Model Output Uncertain"),
+      "운전자 얼굴 확인 중",
+      "운전자 얼굴 인식이 어렵습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .4, 0., 1.),
 
   Alert(
       "geofence",
-      _("DISENGAGEMENT REQUIRED"),
-      _("Not in Geofenced Area"),
+      "해제 필요",
+      "지오 펜스 영역에 있지 않음",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.HIGH, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, .1, .1),
 
   Alert(
       "startup",
-      _("Be ready to take over at any time"),
-      _("Always keep hands on wheel and eyes on road"),
+      "오픈파일럿 사용준비가 되었습니다",
+      "안전운전을 위해 항상 핸들을 잡고 도로교통 상황을 주시하세요",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.chimeReady, 4., 0., 5.),
 
   Alert(
       "startupMaster",
-      _("WARNING: This branch is not tested"),
-      _("Always keep hands on wheel and eyes on road"),
+      "경고: 이 브랜치는 테스트되지 않았습니다",
+      "안전운전을 위해 항상 핸들을 잡고 도로교통 상황을 주시하세요",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
 
   Alert(
       "startupNoControl",
-      _("Dashcam mode"),
-      _("Always keep hands on wheel and eyes on road"),
+      "기록 모드(대시캠 모드)",
+      "안전운전을 위해 항상 핸들을 잡고 도로교통 상황을 주시하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
 
   Alert(
       "startupNoCar",
-      _("Dashcam mode for unsupported car"),
-      _("Always keep hands on wheel and eyes on road"),
+      "기록모드(지원되지 않는 차량)",
+      "안전운전을 위해 항상 핸들을 잡고 도로교통 상황을 주시하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
 
   Alert(
       "ethicalDilemma",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Ethical Dilemma Detected"),
+      "경고: 핸들을 즉시 잡아주세요",
+      "윤리적 딜레마가 발견되었습니다",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 1., 3., 3.),
 
   Alert(
       "steerTempUnavailableNoEntry",
-      _("openpilot Unavailable"),
-      _("Steering Temporarily Unavailable"),
+      "오픈파일럿 사용 불가",
+      "조향 제어가 일시적으로 비활성화 되었습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 0., 3.),
 
   Alert(
       "manualRestart",
-      _("TAKE CONTROL"),
-      _("Resume Driving Manually"),
+      "핸들을 잡아주세요",
+      "수동으로 운전을 재개하세요",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "resumeRequired",
-      _("STOPPED"),
-      _("Press Resume to Move"),
+      "멈춤",
+      "계속하려면 RES를 누르세요",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "belowSteerSpeed",
-      _("TAKE CONTROL"),
-      _("Steer Unavailable Below "),
+      "핸들을 잡아주세요",
+      "차량속도가 낮아 조향제어가 일시적으로 비활성화 되었습니다",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.MID, VisualAlert.steerRequired, AudibleAlert.none, 0., 0.4, .3),
+      Priority.MID, VisualAlert.none, AudibleAlert.none, 0., 0.4, .3),
 
   Alert(
       "debugAlert",
-      _("DEBUG ALERT"),
+      "DEBUG ALERT",
       "",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .1, .1, .1),
   Alert(
       "preLaneChangeLeft",
-      _("Steer Left to Start Lane Change"),
-      _("Monitor Other Vehicles"),
+      "차선 변경을 위해 핸들을 좌측으로 살짝 돌리세요",
+      "다른 차량에 주의하세요",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
 
   Alert(
       "preLaneChangeRight",
-      _("Steer Right to Start Lane Change"),
-      _("Monitor Other Vehicles"),
+      "차선 변경을 위해 핸들을 우측으로 살짝 돌리세요",
+      "다른 차량에 주의하세요",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.75),
 
   Alert(
       "laneChange",
-      _("Changing Lane"),
-      _("Monitor Other Vehicles"),
+      "차선 변경 중",
+      "다른 차량에 주의하세요",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1),
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1),
+  
+    Alert(
+      "rightLCAbsm",
+      "우측에 차량 접근 중",
+      "차선 변경을 위해 잠시 대기합니다",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.MID, VisualAlert.none, AudibleAlert.none, 0., 0.4, .3),
+  
+  Alert(
+      "leftLCAbsm",
+      "좌측에 차량 접근 중",
+      "차선 변경을 위해 잠시 대기합니다",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.MID, VisualAlert.none, AudibleAlert.none, 0., 0.4, .3),
+  
+  Alert(
+      "preventLCA",
+      "핸들을 잡아주세요",
+      "도로 상황 불안으로 차선변경이 취소되었습니다",
+      AlertStatus.critical, AlertSize.full,
+      Priority.HIGH, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .4, 3., 3.,),
+
 
   Alert(
       "posenetInvalid",
-      _("TAKE CONTROL"),
-      _("Vision Model Output Uncertain"),
+      "핸들을 잡아주세요",
+      "전방 영상 인식이 불확실합니다",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning1, .4, 2., 3.),
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeViewUncertain, 3., 2., 3.),
 
   # Non-entry only alerts
   Alert(
       "wrongCarModeNoEntry",
-      _("openpilot Unavailable"),
-      _("Main Switch Off"),
+      "오픈파일럿 사용 불가",
+      "주 전원 꺼짐",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 0., 3.),
 
   Alert(
       "dataNeededNoEntry",
-      _("openpilot Unavailable"),
-      _("Calibration Needs Data. Upload Drive, Try Again"),
+      "오픈파일럿 사용 불가",
+      "캘리브레이션을 위한 데이터 필요, 자료를 업로드 하시고 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 0., 3.),
 
   Alert(
       "outOfSpaceNoEntry",
-      _("openpilot Unavailable"),
-      _("Out of Storage Space"),
+      "오픈파일럿 사용 불가",
+      "저장 공간이 부족합니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 0., 3.),
 
   Alert(
       "pedalPressedNoEntry",
-      _("openpilot Unavailable"),
-      _("Pedal Pressed During Attempt"),
+      "오픈파일럿 사용 불가",
+      "브레이크 페달 밟음",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, "brakePressed", AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "speedTooLowNoEntry",
-      _("openpilot Unavailable"),
-      _("Speed Too Low"),
+      "오픈파일럿 사용 불가",
+      "차량 속도가 너무 느립니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "brakeHoldNoEntry",
-      _("openpilot Unavailable"),
-      _("Brake Hold Active"),
+      "오픈파일럿 사용 불가",
+      "브레이크 해제 필요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "parkBrakeNoEntry",
-      _("openpilot Unavailable"),
-      _("Park Brake Engaged"),
+      "오픈파일럿 사용 불가",
+      "주차 브레이크 해제 필요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "lowSpeedLockoutNoEntry",
-      _("openpilot Unavailable"),
-      _("Cruise Fault: Restart the Car"),
+      "오픈파일럿 사용 불가",
+      "크루즈 기능 오류: 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "lowBatteryNoEntry",
-      _("openpilot Unavailable"),
-      _("Low Battery"),
+      "오픈파일럿 사용 불가",
+      "배터리 부족",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "sensorDataInvalidNoEntry",
-      _("openpilot Unavailable"),
-      _("No Data from Device Sensors"),
+      "오픈파일럿 사용 불가",
+      "EON 센서로부터 데이터를 받지 못했습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "soundsUnavailableNoEntry",
-      _("openpilot Unavailable"),
-      _("Speaker not found"),
+      "오픈파일럿 사용 불가",
+      "사운드 장치를 찾을 수 없습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "tooDistractedNoEntry",
-      _("openpilot Unavailable"),
-      _("Distraction Level Too High"),
+      "오픈파일럿 사용 불가",
+      "과도한 운전 산만",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   # Cancellation alerts causing soft disabling
   Alert(
       "overheat",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("System Overheated"),
+      "오픈파일럿 사용 경고",
+      "시스템이 과열되었습니다",
       AlertStatus.critical, AlertSize.full,
       Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
 
   Alert(
       "wrongGear",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Gear not D"),
+      "오픈파일럿 사용 경고",
+      "기어가 드라이브 상태가 아닙니다",
       AlertStatus.critical, AlertSize.full,
-      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
+      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeGearDrive, 3., 2., 2.),
 
   Alert(
       "calibrationInvalid",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Calibration Invalid: Reposition Device and Recalibrate"),
+      "오픈파일럿 사용 경고",
+      "캘리브레이션 오류: EON을 재 장착하고 다시 시작하세요",
       AlertStatus.critical, AlertSize.full,
       Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
 
   Alert(
       "calibrationIncomplete",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Calibration in Progress"),
+      "오픈파일럿 사용 경고",
+      "캘리브레이션 진행 중...",
       AlertStatus.critical, AlertSize.full,
       Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
 
   Alert(
       "doorOpen",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Door Open"),
+      "오픈파일럿 사용 경고",
+      "도어가 열려있습니다",
       AlertStatus.critical, AlertSize.full,
-      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
+      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeDoorOpen, 3., 2., 2.),
 
   Alert(
       "seatbeltNotLatched",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Seatbelt Unlatched"),
+      "오픈파일럿 사용 경고",
+      "안전벨트 미체결",
       AlertStatus.critical, AlertSize.full,
-      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
+      Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeSeatBelt, 2., 2., 2.),
 
   Alert(
       "espDisabled",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("ESP Off"),
+      "오픈파일럿 사용 경고",
+      "ESP 오프",
       AlertStatus.critical, AlertSize.full,
       Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
 
   Alert(
       "lowBattery",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Low Battery"),
+      "오픈파일럿 사용 경고",
+      "배터리 부족",
       AlertStatus.critical, AlertSize.full,
       Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
 
   Alert(
       "commIssue",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Communication Issue between Processes"),
+      "오픈파일럿 사용 경고",
+      "프로세스 간 통신 오류가 있습니다",
       AlertStatus.critical, AlertSize.full,
       Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
 
   Alert(
       "radarCommIssue",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Radar Communication Issue"),
+      "오픈파일럿 사용 경고",
+      "레이더 통신 오류가 있습니다",
       AlertStatus.critical, AlertSize.full,
       Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
 
   Alert(
       "radarCanError",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Radar Error: Restart the Car"),
+      "오픈파일럿 사용 경고",
+      "레이더 통신 오류: 차량을 다시 시작하세요",
       AlertStatus.critical, AlertSize.full,
       Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
 
   Alert(
       "radarFault",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Radar Error: Restart the Car"),
+      "오픈파일럿 사용 경고",
+      "레이더 통신 오류: 차량을 다시 시작하세요",
       AlertStatus.critical, AlertSize.full,
       Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
 
 
   Alert(
       "lowMemory",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Low Memory: Reboot Your Device"),
+      "오픈파일럿 사용 경고",
+      "메모리 부족: EON을 재시작 하세요",
       AlertStatus.critical, AlertSize.full,
       Priority.MID, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, 2., 2.),
 
   # Cancellation alerts causing immediate disabling
   Alert(
       "controlsFailed",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Controls Failed"),
+      "오픈파일럿 사용 경고",
+      "차량 제어 불가",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "controlsMismatch",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Controls Mismatch"),
+      "오픈파일럿 사용 경고",
+      "차량 제어 불가",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "canError",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("CAN Error: Check Connections"),
+      "오픈파일럿 사용 경고",
+      "CAN통신 오류: 배선을 확인하세요",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "steerUnavailable",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("LKAS Fault: Restart the Car"),
+      "오픈파일럿 사용 경고",
+      "LKAS 오류: 차량을 다시 시작하세요",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "brakeUnavailable",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Cruise Fault: Restart the Car"),
+      "오픈파일럿 사용 경고",
+      "크루즈 시스템 오류: 차량을 다시 시작하세요",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "gasUnavailable",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Gas Fault: Restart the Car"),
+      "오픈파일럿 사용 경고",
+      "가속페달 오류: 차량을 다시 시작하세요",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "reverseGear",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Reverse Gear"),
+      "오픈파일럿 사용 경고",
+      "기어가 후진상태에 있습니다",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "cruiseDisabled",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Cruise Is Off"),
+      "오픈파일럿 사용 경고",
+      "크루즈 기능 꺼짐",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "plannerError",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Planner Solution Error"),
+      "오픈파일럿 사용 경고",
+      "조향 처리에 오류가 있습니다",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
   Alert(
       "relayMalfunction",
-      _("TAKE CONTROL IMMEDIATELY"),
-      _("Harness Malfunction"),
+      "TAKE CONTROL IMMEDIATELY",
+      "Harness Malfunction",
       AlertStatus.critical, AlertSize.full,
       Priority.HIGHEST, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
 
@@ -516,358 +550,357 @@ ALERTS = [
   # not loud cancellations (user is in control)
   Alert(
       "noTarget",
-      _("openpilot Canceled"),
-      _("No close lead car"),
+      "오픈파일럿 사용 불가",
+      "선행 차량이 감지되지 않았습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.HIGH, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
 
   Alert(
       "speedTooLow",
-      _("openpilot Canceled"),
-      _("Speed too low"),
+      "오픈파일럿 사용 불가",
+      "차량 속도가 너무 느립니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.HIGH, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
 
   Alert(
       "speedTooHigh",
-      _("Speed Too High"),
-      _("Slow down to resume operation"),
+      "Speed Too High",
+      "Slow down to resume operation",
       AlertStatus.normal, AlertSize.mid,
       Priority.HIGH, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
 
   # Cancellation alerts causing non-entry
   Alert(
       "overheatNoEntry",
-      _("openpilot Unavailable"),
-      _("System overheated"),
+      "오픈파일럿 사용 불가",
+      "시스템이 과열되었습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "wrongGearNoEntry",
-      _("openpilot Unavailable"),
-      _("Gear not D"),
+      "오픈파일럿 사용 불가",
+      "기어가 드라이브 상태가 아닙니다",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeGearDrive, 3., 2., 3.),
 
   Alert(
       "calibrationInvalidNoEntry",
-      _("openpilot Unavailable"),
-      _("Calibration Invalid: Reposition Device & Recalibrate"),
+      "오픈파일럿 사용 불가",
+      "캘리브레이션 오류: EON을 재 장착하고 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "calibrationIncompleteNoEntry",
-      _("openpilot Unavailable"),
-      _("Calibration in Progress"),
+      "오픈파일럿 사용 일시 불가",
+      "캘리브레이션 진행 중...",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "doorOpenNoEntry",
-      _("openpilot Unavailable"),
-      _("Door open"),
+      "오픈파일럿 사용 불가",
+      "도어가 열려있습니다",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeDoorOpen, 3., 2., 3.),
 
   Alert(
       "seatbeltNotLatchedNoEntry",
-      _("openpilot Unavailable"),
-      _("Seatbelt unlatched"),
+      "오픈파일럿 사용 불가",
+      "안전벨트를 체결 하세요",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
+      Priority.LOW, VisualAlert.none, AudibleAlert.chimeSeatBelt, 2., 2., 3.),
 
   Alert(
       "espDisabledNoEntry",
-      _("openpilot Unavailable"),
-      _("ESP Off"),
+      "오픈파일럿 사용 불가",
+      "ESP 꺼짐",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "geofenceNoEntry",
-      _("openpilot Unavailable"),
-      _("Not in Geofenced Area"),
+      "오픈파일럿 사용 불가",
+      "지오 펜스 영역에 있지 않음",
       AlertStatus.normal, AlertSize.mid,
       Priority.MID, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "radarCanErrorNoEntry",
-      _("openpilot Unavailable"),
-      _("Radar Error: Restart the Car"),
+      "오픈파일럿 사용 불가",
+      "레이더 통신 오류: 차를 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "radarFaultNoEntry",
-      _("openpilot Unavailable"),
-      _("Radar Error: Restart the Car"),
+      "오픈파일럿 사용 불가",
+      "레이더 통신 오류: 차를 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "posenetInvalidNoEntry",
-      _("openpilot Unavailable"),
-      _("Vision Model Output Uncertain"),
+      "오픈파일럿 사용 불가",
+      "전방 영상 인식이 불확실합니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "controlsFailedNoEntry",
-      _("openpilot Unavailable"),
-      _("Controls Failed"),
+      "오픈파일럿 사용 불가",
+      "차량 제어 불가",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "canErrorNoEntry",
-      _("openpilot Unavailable"),
-      _("CAN Error: Check Connections"),
+      "오픈파일럿 사용 불가",
+      "CAN통신 오류: 배선을 다시 확인하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "steerUnavailableNoEntry",
-      _("openpilot Unavailable"),
-      _("LKAS Fault: Restart the Car"),
+      "오픈파일럿 사용 불가",
+      "LKAS 오류: 차량을 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "brakeUnavailableNoEntry",
-      _("openpilot Unavailable"),
-      _("Cruise Fault: Restart the Car"),
+      "오픈파일럿 사용 불가",
+      "크루즈 시스템 오류: 차량을 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "gasUnavailableNoEntry",
-      _("openpilot Unavailable"),
-      _("Gas Error: Restart the Car"),
+      "오픈파일럿 사용 불가",
+      "가속페달 오류: 차량을 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "reverseGearNoEntry",
-      _("openpilot Unavailable"),
-      _("Reverse Gear"),
+      "오픈파일럿 사용 불가",
+      "기어가 후진상태에 있습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "cruiseDisabledNoEntry",
-      _("openpilot Unavailable"),
-      _("Cruise is Off"),
+      "오픈파일럿 사용 불가",
+      "크루즈 기능 꺼짐",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "noTargetNoEntry",
-      _("openpilot Unavailable"),
-      _("No Close Lead Car"),
+      "오픈파일럿 사용 불가",
+      "선행 차량이 감지되지 않았습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "plannerErrorNoEntry",
-      _("openpilot Unavailable"),
-      _("Planner Solution Error"),
+      "오픈파일럿 사용 불가",
+      "조향 처리에 오류가 있습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "commIssueNoEntry",
-      _("openpilot Unavailable"),
-      _("Communication Issue between Processes"),
+      "오픈파일럿 사용 불가",
+      "프로세스 간 통신 오류가 있습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
 
   Alert(
       "radarCommIssueNoEntry",
-      _("openpilot Unavailable"),
-      _("Radar Communication Issue"),
+      "오픈파일럿 사용 불가",
+      "레이더 통신 오류가 있습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
 
   Alert(
       "internetConnectivityNeededNoEntry",
-      _("openpilot Unavailable"),
-      _("Please Connect to Internet"),
+      "오픈파일럿 사용 불가",
+      "인터넷에 연결하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
 
   Alert(
       "lowMemoryNoEntry",
-      _("openpilot Unavailable"),
-      _("Low Memory: Reboot Your Device"),
+      "오픈파일럿 사용 불가",
+      "메모리 부족: EON을 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
 
   Alert(
       "speedTooHighNoEntry",
-      _("Speed Too High"),
-      _("Slow down to engage"),
+      "Speed Too High",
+      "Slow down to engage",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   Alert(
       "relayMalfunctionNoEntry",
-      _("openpilot Unavailable"),
-      _("Harness Malfunction"),
+      "openpilot Unavailable",
+      "Harness Malfunction",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.chimeError, .4, 2., 3.),
 
   # permanent alerts
   Alert(
       "steerUnavailablePermanent",
-      _("LKAS Fault: Restart the car to engage"),
+      "LKAS 오류: 차량을 다시 시작하세요",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "brakeUnavailablePermanent",
-      _("Cruise Fault: Restart the car to engage"),
+      "크루즈 시스템 오류: 차량을 다시 시작하세요",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "lowSpeedLockoutPermanent",
-      _("Cruise Fault: Restart the car to engage"),
+      "크루즈 시스템 오류: 차량을 다시 시작하세요",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "calibrationIncompletePermanent",
-      _("Calibration in Progress: "),
-      _("Drive Above "),
+      "캘리브레이션 진행 중: ",
+      "차량의 속도를 높이세요 > ",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "invalidGiraffeToyotaPermanent",
-      _("Unsupported Giraffe Configuration"),
-      _("Visit comma.ai/tg"),
+      "지원되지 않는 지라프 설정",
+      "comma.ai/tg 참조",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "invalidLkasSettingPermanent",
-      _("Stock LKAS is turned on"),
-      _("Turn off stock LKAS to engage"),
+      "Stock LKAS is turned on",
+      "Turn off stock LKAS to engage",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "internetConnectivityNeededPermanent",
-      _("Please connect to Internet"),
-      _("An Update Check Is Required to Engage"),
+      "인터넷에 연결하세요",
+      "활성화를 위해 업데이트를 확인해야 합니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "communityFeatureDisallowedPermanent",
-      _("Community Feature Detected"),
-      _("Enable Community Features in Developer Settings"),
+      "커뮤니티 기능 감지",
+      "Enable Community Features in Developer Settings",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, 0., 0., .2),  # LOW priority to overcome Cruise Error
 
   Alert(
       "sensorDataInvalidPermanent",
-      _("No Data from Device Sensors"),
-      _("Reboot your Device"),
+      "EON 센서로부터 데이터를 받지 못했습니다",
+      "EON을 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "soundsUnavailablePermanent",
-      _("Speaker not found"),
-      _("Reboot your Device"),
+      "사운드 장치를 찾을 수 없습니다",
+      "EON을 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "lowMemoryPermanent",
-      _("RAM Critically Low"),
-      _("Reboot your Device"),
+      "메모리 부족 심각",
+      "EON을 다시 시작하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "carUnrecognizedPermanent",
-      _("Dashcam Mode"),
-      _("Car Unrecognized"),
+      "기록 모드",
+      "인식되지 않은 차량 모델",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "relayMalfunctionPermanent",
-      _("Harness Malfunction"),
-      _("Please Check Hardware"),
+      "하네스 오작동",
+      "하드웨어를 점검하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
 
   Alert(
       "vehicleModelInvalid",
-      _("Vehicle Parameter Identification Failed"),
+      "차량 매개변수 인식 실패",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOWEST, VisualAlert.steerRequired, AudibleAlert.none, .0, .0, .1),
 
   Alert(
       "ldwPermanent",
-      _("TAKE CONTROL"),
-      _("Lane Departure Detected"),
+      "핸들을 잡아주세요",
+      "차선 이탈 감지",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 2., 3.),
-
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeLaneDeparture, 4., 2., 3.),
   # dp
   Alert(
       "preLaneChangeLeftALC",
-      _("Left ALC will engage in 3 seconds"),
-      _("Monitor Other Vehicles"),
+      "3초안에 좌측 차선변경을 시작합니다",
+      "다른차량에 주의하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1, alert_rate=0.75),
 
   Alert(
       "preLaneChangeRightALC",
-      _("Right ALC will engage in 3 seconds"),
-      _("Monitor Other Vehicles"),
+      "3초안에 우측 차선변경을 시작합니다",
+      "다른 차량에 주의하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1, alert_rate=0.75),
 
   Alert(
       "laneChangeALC",
-      _("Changing Lane"),
-      _("Monitor Other Vehicles"),
+      "차선 변경 중",
+      "다른 차량에 주의하세요",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1),
 
   Alert(
       "manualSteeringRequired",
-      _("STEERING REQUIRED: Lane Keeping OFF"),
+      "핸들을 잡아주세요: 차선유지기능 꺼짐",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
 
   Alert(
       "manualSteeringRequiredBlinkersOn",
-      _("STEERING REQUIRED: Blinkers ON"),
+      "핸들을 잡아주세요: 턴 시그널 켜짐",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
   Alert(
       "leadCarMoving",
-      _("Lead Car Is Moving"),
+      "선행차량이 출발했습니다",
       "",
       AlertStatus.userPrompt, AlertSize.small,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimeWarning2, .1, .1, .1),
   Alert(
       "leadCarDetected",
-      _("Lead Car Detected"),
+      "선행차량 감지됨",
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1, alert_rate=0.25),
