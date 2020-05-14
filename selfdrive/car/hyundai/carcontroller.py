@@ -18,42 +18,9 @@ ACCEL_MAX = 1.5  # 1.5 m/s2
 ACCEL_MIN = -3.0 # 3   m/s2
 ACCEL_SCALE = max(ACCEL_MAX, -ACCEL_MIN)
 
-def accel_hysteresis(accel, accel_steady):
 
-  # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
-  if accel > accel_steady + ACCEL_HYST_GAP:
-    accel_steady = accel - ACCEL_HYST_GAP
-  elif accel < accel_steady - ACCEL_HYST_GAP:
-    accel_steady = accel + ACCEL_HYST_GAP
-  accel = accel_steady
 
-  return accel, accel_steady
 
-def process_hud_alert(enabled, fingerprint, visual_alert, left_lane,
-                      right_lane, left_lane_depart, right_lane_depart):
-  sys_warning = (visual_alert == VisualAlert.steerRequired)
-
-  # initialize to no line visible
-  sys_state = 1
-  if left_lane and right_lane or sys_warning:  #HUD alert only display when LKAS status is active
-    if enabled or sys_warning:
-      sys_state = 3
-    else:
-      sys_state = 4
-  elif left_lane:
-    sys_state = 5
-  elif right_lane:
-    sys_state = 6
-
-  # initialize to no warnings
-  left_lane_warning = 0
-  right_lane_warning = 0
-  if left_lane_depart:
-    left_lane_warning = 1 if fingerprint in [CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
-  if right_lane_depart:
-    right_lane_warning = 1 if fingerprint in [CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
-
-  return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
@@ -77,6 +44,45 @@ class CarController():
     self.dp_last_modified = None
     self.lane_change_enabled = True
 
+
+  def accel_hysteresis(self, accel, accel_steady):
+
+    # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
+    if accel > accel_steady + ACCEL_HYST_GAP:
+      accel_steady = accel - ACCEL_HYST_GAP
+    elif accel < accel_steady - ACCEL_HYST_GAP:
+      accel_steady = accel + ACCEL_HYST_GAP
+    accel = accel_steady
+
+    return accel, accel_steady    
+
+
+  def process_hud_alert( self, enabled, fingerprint, visual_alert, left_lane,
+                        right_lane, left_lane_depart, right_lane_depart):
+    sys_warning = (visual_alert == VisualAlert.steerRequired)
+
+    # initialize to no line visible
+    sys_state = 1
+    if left_lane and right_lane or sys_warning:  #HUD alert only display when LKAS status is active
+      if enabled or sys_warning:
+        sys_state = 3
+      else:
+        sys_state = 4
+    elif left_lane:
+      sys_state = 5
+    elif right_lane:
+      sys_state = 6
+
+    # initialize to no warnings
+    left_lane_warning = 0
+    right_lane_warning = 0
+    if left_lane_depart:
+      left_lane_warning = 1 if fingerprint in [CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
+    if right_lane_depart:
+      right_lane_warning = 1 if fingerprint in [CAR.GENESIS_G90, CAR.GENESIS_G80] else 2
+
+    return sys_warning, sys_state, left_lane_warning, right_lane_warning    
+
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart):
 
@@ -85,7 +91,7 @@ class CarController():
     # gas and brake
     apply_accel = actuators.gas - actuators.brake
 
-    apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady)
+    apply_accel, self.accel_steady = self.accel_hysteresis(apply_accel, self.accel_steady)
     apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
 
     # dp
@@ -131,7 +137,7 @@ class CarController():
                                          lkas_active)
 
     sys_warning, sys_state, left_lane_warning, right_lane_warning =\
-      process_hud_alert(enabled, self.car_fingerprint, visual_alert,
+      self.process_hud_alert(enabled, self.car_fingerprint, visual_alert,
                         left_lane, right_lane, left_lane_depart, right_lane_depart)
 
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
