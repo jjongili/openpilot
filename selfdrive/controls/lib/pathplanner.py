@@ -81,6 +81,16 @@ class PathPlanner():
     self.dp_sr_boost_bp = None
     self.dp_sr_boost_range = None
 
+
+  def limit_ctrl(self, value, limit, offset ):
+      p_limit = offset + limit
+      m_limit = offset - limit
+      if value > p_limit:
+          value = p_limit
+      elif  value < m_limit:
+          value = m_limit
+      return value    
+
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
     self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, self.steer_rate_cost)
@@ -161,6 +171,9 @@ class PathPlanner():
     active = sm['controlsState'].active
 
     angle_offset = sm['liveParameters'].angleOffset
+
+    # atom
+    v_ego_kph = v_ego * CV.MS_TO_KPH    
 
     # Run MPC
     self.angle_steers_des_prev = self.angle_steers_des_mpc
@@ -280,7 +293,22 @@ class PathPlanner():
 
     self.cur_state[0].delta = delta_desired
 
-    self.angle_steers_des_mpc = float(math.degrees(delta_desired * self.dp_steer_ratio) + angle_offset)
+    #self.angle_steers_des_mpc = float(math.degrees(delta_desired * self.dp_steer_ratio) + angle_offset)
+    #old_angle_steers_des = self.angle_steers_des_mpc
+    org_angle_steers_des = float(math.degrees(delta_desired * self.steerRatio) + angle_offset)
+    self.angle_steers_des_mpc = org_angle_steers_des
+
+    # atom
+    if v_ego_kph < 40:
+        xp = [0,5,20,40]
+        fp2 = [0.3,0.5,1,1.5]
+        limit_steers = interp( v_ego_kph, xp, fp2 )
+        angle_steers_des = self.limit_ctrl( org_angle_steers_des, limit_steers, angle_steers )
+        self.angle_steers_des_mpc = angle_steers_des
+    elif self.lane_change_state != LaneChangeState.off:
+        self.angle_steers_des_mpc = self.limit_ctrl( org_angle_steers_des, 10, angle_steers )
+
+
 
     #  Check for infeasable MPC solution
     mpc_nans = any(math.isnan(x) for x in self.mpc_solution[0].delta)
