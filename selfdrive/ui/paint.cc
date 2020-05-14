@@ -482,13 +482,13 @@ static void ui_draw_vision_maxspeed(UIState *s) {
 
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
   const int text_x = viz_maxspeed_x + (viz_maxspeed_xo / 2) + (viz_maxspeed_w / 2);
-  ui_draw_text(s->vg, text_x, 148, (strcmp(s->dragon_locale, "zh-TW") == 0? "最高速限" : strcmp(s->dragon_locale, "zh-CN") == 0? "最高速限" : "MAX"), 26 * 2.5, COLOR_WHITE_ALPHA(is_cruise_set ? 200 : 100), s->font_sans_regular);
+  ui_draw_text(s->vg, text_x, 148, (strcmp(s->dragon_locale, "ko-KR") == 0? "설정속도" : "MAX"), 26 * 2.5, COLOR_WHITE_ALPHA(is_cruise_set ? 200 : 100), s->font_sans_regular);
 
   if (is_cruise_set) {
     snprintf(maxspeed_str, sizeof(maxspeed_str), "%d", maxspeed_calc);
     ui_draw_text(s->vg, text_x, 242, maxspeed_str, 48 * 2.5, COLOR_WHITE, s->font_sans_bold);
   } else {
-    ui_draw_text(s->vg, text_x, 242, (strcmp(s->dragon_locale, "zh-TW") == 0? "未設" : strcmp(s->dragon_locale, "zh-CN") == 0? "未设" : "N/A"), 42 * 2.5, COLOR_WHITE_ALPHA(100), s->font_sans_semibold);
+    ui_draw_text(s->vg, text_x, 242, (strcmp(s->dragon_locale, "ko-KR") == 0? "-" : "N/A"), 42 * 2.5, COLOR_WHITE_ALPHA(100), s->font_sans_semibold);
   }
 }
 
@@ -536,8 +536,8 @@ static void ui_draw_vision_speedlimit(UIState *s) {
   // Draw "Speed Limit" Text
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
   color = is_speedlim_valid && s->is_ego_over_limit ? COLOR_WHITE : COLOR_BLACK;
-  ui_draw_text(s->vg, text_x + (is_speedlim_valid ? 6 : 0), text_y, (strcmp(s->dragon_locale, "zh-TW") == 0? "智能" : strcmp(s->dragon_locale, "zh-CN") == 0? "智能" : "SMART"), 50, color, s->font_sans_semibold);
-  ui_draw_text(s->vg, text_x + (is_speedlim_valid ? 6 : 0), text_y + 40, (strcmp(s->dragon_locale, "zh-TW") == 0? "速度" : strcmp(s->dragon_locale, "zh-CN") == 0? "速度" : "DESIR STEER"), 50, color, s->font_sans_semibold);
+  ui_draw_text(s->vg, text_x + (is_speedlim_valid ? 6 : 0), text_y, (strcmp(s->dragon_locale, "ko-KR") == 0? "SMART" : "SMART"), 50, color, s->font_sans_semibold);
+  ui_draw_text(s->vg, text_x + (is_speedlim_valid ? 6 : 0), text_y + 40, (strcmp(s->dragon_locale, "ko-KR") == 0? "필요조향각" : "DESIR STEER"), 50, color, s->font_sans_semibold);
 
   // Draw Speed Text
   color = s->is_ego_over_limit ? COLOR_WHITE : COLOR_BLACK;
@@ -545,7 +545,7 @@ static void ui_draw_vision_speedlimit(UIState *s) {
     snprintf(speedlim_str, sizeof(speedlim_str), "%d", speedlim_calc);
     ui_draw_text(s->vg, text_x, viz_speedlim_y + (is_speedlim_valid ? 170 : 165), speedlim_str, 48*2.5, color, s->font_sans_bold);
   } else {
-    ui_draw_text(s->vg, text_x, viz_speedlim_y + (is_speedlim_valid ? 170 : 165), (strcmp(s->dragon_locale, "zh-TW") == 0? "未設" : strcmp(s->dragon_locale, "zh-CN") == 0? "未设" : "N/A"), 42*2.5, color, s->font_sans_semibold);
+    ui_draw_text(s->vg, text_x, viz_speedlim_y + (is_speedlim_valid ? 170 : 165), (strcmp(s->dragon_locale, "ko-KR") == 0? "-" : "N/A"), 42*2.5, color, s->font_sans_semibold);
   }
 }
 
@@ -592,7 +592,7 @@ static void ui_draw_vision_speed(UIState *s) {
     }
 
     if(s->scene.leftBlinker || s->scene.rightBlinker) {
-      s->scene.blinker_blinkingrate -= 3;
+      s->scene.blinker_blinkingrate -= 5.5;
       if(s->scene.blinker_blinkingrate<0) s->scene.blinker_blinkingrate = 120;
     }
   }
@@ -646,14 +646,14 @@ static void ui_draw_df_button(UIState *s) {
 
   nvgFontFaceId(s->vg,  s->font_sans_regular);
   nvgFillColor(s->vg, COLOR_WHITE_ALPHA(200));
-  nvgFontSize(s->vg, (strcmp(s->dragon_locale, "zh-TW") == 0? 96 : strcmp(s->dragon_locale, "zh-CN") == 0? 96 : 48));
+  nvgFontSize(s->vg, (strcmp(s->dragon_locale, "zh-TW") == 0? 96 : strcmp(s->dragon_locale, "ko-KR") == 0? 96 : 48));
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER);
   int val = s->dragon_df_mode;
 
   nvgText(s->vg, df_btn_x + df_btn_w / 2, df_btn_y + df_btn_h / 2,
-  val == 1? (strcmp(s->dragon_locale, "zh-TW") == 0? "長距" : strcmp(s->dragon_locale, "zh-CN") == 0? "长距" : "LONG") :
-  val == 2? (strcmp(s->dragon_locale, "zh-TW") == 0? "正常" : strcmp(s->dragon_locale, "zh-CN") == 0? "正常" : "NORMAL") :
-  (strcmp(s->dragon_locale, "zh-TW") == 0? "短距" : strcmp(s->dragon_locale, "zh-CN") == 0? "短距" : "SHORT"),
+  val == 1? (strcmp(s->dragon_locale, "ko-KR") == 0? "길게" : "LONG") :
+  val == 2? (strcmp(s->dragon_locale, "ko-KR") == 0? "보통" : "NORMAL") :
+  (strcmp(s->dragon_locale, "ko-KR") == 0? "짧게" : "SHORT"),
   NULL);
 
   nvgFontFaceId(s->vg,  s->font_sans_regular);
@@ -661,7 +661,7 @@ static void ui_draw_df_button(UIState *s) {
   nvgFontSize(s->vg, 37.5);
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER);
   nvgText(s->vg, df_btn_x + df_btn_w / 2, df_btn_y + df_btn_h - 10,
-  (strcmp(s->dragon_locale, "zh-TW") == 0? "車距" : strcmp(s->dragon_locale, "zh-CN") == 0? "车距" : "FOLLOW"),
+  (strcmp(s->dragon_locale, "ko-KR") == 0? "차간거리" : "FOLLOW"),
   NULL);
 }
 
@@ -674,13 +674,13 @@ static void ui_draw_ap_button(UIState *s) {
 
   nvgFontFaceId(s->vg,  s->font_sans_regular);
   nvgFillColor(s->vg, COLOR_WHITE_ALPHA(200));
-  nvgFontSize(s->vg, (strcmp(s->dragon_locale, "zh-TW") == 0? 96 : strcmp(s->dragon_locale, "zh-CN") == 0? 96 : 48));
+  nvgFontSize(s->vg, (strcmp(s->dragon_locale, "ko-KR") == 0? 96 : 48));
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER);
   int val = s->dragon_ap_mode;
   nvgText(s->vg, ap_btn_x + ap_btn_w / 2, ap_btn_y + ap_btn_h / 2,
-  val == 1? (strcmp(s->dragon_locale, "zh-TW") == 0? "節能" : strcmp(s->dragon_locale, "zh-CN") == 0? "节能" : "ECO") :
-  val == 2? (strcmp(s->dragon_locale, "zh-TW") == 0? "正常" : strcmp(s->dragon_locale, "zh-CN") == 0? "正常" : "NORMAL") :
-  (strcmp(s->dragon_locale, "zh-TW") == 0? "運動" : strcmp(s->dragon_locale, "zh-CN") == 0? "运动" : "SPORT"),
+  val == 1? (strcmp(s->dragon_locale, "ko-KR") == 0? "에코" : "ECO") :
+  val == 2? (strcmp(s->dragon_locale, "ko-KR") == 0? "보통" : "NORMAL") :
+  (strcmp(s->dragon_locale, "ko-KR") == 0? "스포츠" : "SPORT"),
   NULL);
 
   nvgFontFaceId(s->vg,  s->font_sans_regular);
@@ -688,7 +688,7 @@ static void ui_draw_ap_button(UIState *s) {
   nvgFontSize(s->vg, 37.5);
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER);
   nvgText(s->vg, ap_btn_x + ap_btn_w / 2, ap_btn_y + ap_btn_h - 10,
-  (strcmp(s->dragon_locale, "zh-TW") == 0? "加速" : strcmp(s->dragon_locale, "zh-CN") == 0? "加速" : "ACCEL"),
+  (strcmp(s->dragon_locale, "ko-KR") == 0? "가속모드" : "ACCEL"),
   NULL);
 }
 
@@ -920,7 +920,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     }
     snprintf(uom_str, sizeof(uom_str), "m   ");
     bb_h +=bb_ui_draw_measure(s,  val_str, uom_str,
-       (strcmp(s->dragon_locale, "zh-TW") == 0? "真實車距" : strcmp(s->dragon_locale, "zh-CN") == 0? "真实车距" : "REL DIST"),
+       (strcmp(s->dragon_locale, "ko-KR") == 0? "차간거리" : "REL DIST"),
         bb_rx, bb_ry, bb_uom_dx,
         val_color, lab_color, uom_color,
         value_fontSize, label_fontSize, uom_fontSize );
@@ -956,7 +956,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
       snprintf(uom_str, sizeof(uom_str), "mph");
     }
     bb_h +=bb_ui_draw_measure(s,  val_str, uom_str,
-        (strcmp(s->dragon_locale, "zh-TW") == 0? "相對速度" : strcmp(s->dragon_locale, "zh-CN") == 0? "相对速度" : "REAL SPEED"),
+        (strcmp(s->dragon_locale, "ko-KR") == 0? "상대속도" : "REAL SPEED"),
         bb_rx, bb_ry, bb_uom_dx,
         val_color, lab_color, uom_color,
         value_fontSize, label_fontSize, uom_fontSize );
@@ -1002,7 +1002,7 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
 
       snprintf(uom_str, sizeof(uom_str), "");
     bb_h +=bb_ui_draw_measure(s,  val_str, uom_str,
-      (strcmp(s->dragon_locale, "zh-TW") == 0? "實際轉角" : strcmp(s->dragon_locale, "zh-CN") == 0? "实际转角" : "REAL STEER"),
+      (strcmp(s->dragon_locale, "ko-KR") == 0? "현재조향각" : "REAL STEER"),
       bb_rx, bb_ry, bb_uom_dx,
       val_color, lab_color, uom_color,
       value_fontSize, label_fontSize, uom_fontSize );
@@ -1027,7 +1027,7 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
 
     snprintf(uom_str, sizeof(uom_str), "");
     bb_h +=bb_ui_draw_measure(s,  val_str, uom_str,
-      (strcmp(s->dragon_locale, "zh-TW") == 0? "預測轉角" : strcmp(s->dragon_locale, "zh-CN") == 0? "预测转角" : "DESIR STEER"),
+      (strcmp(s->dragon_locale, "ko-KR") == 0? "필요조향각" : "DESIR STEER"),
       bb_rx, bb_ry, bb_uom_dx,
       val_color, lab_color, uom_color,
       value_fontSize, label_fontSize, uom_fontSize );
