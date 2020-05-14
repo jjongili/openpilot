@@ -35,7 +35,6 @@ class CarController():
     self.last_resume_frame = 0
     self.last_lead_distance = 0
     self.turning_signal_timer = 0
-    self.lkas_button_on = True
     self.longcontrol = False #TODO: make auto
 
     # dp
