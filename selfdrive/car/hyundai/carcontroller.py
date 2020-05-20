@@ -37,8 +37,8 @@ class CarController():
     self.last_resume_frame = 0
     self.last_lead_distance = 0
     self.turning_signal_timer = 0
-    self.lkas_button = 1
-    self.lkas_button_last = 0
+    #self.lkas_button = 1
+    #self.lkas_button_last = 0
     self.longcontrol = 0 #TODO: make auto
     self.low_speed_car = False 
     self.streer_angle_over = False
@@ -171,19 +171,16 @@ class CarController():
 
 
     ### LKAS button to temporarily disable steering
-    if not CS.lkas_error:
-      if self.lkas_button != CS.lkas_button_on:
-         self.lkas_button = CS.lkas_button_on
+    #if not CS.lkas_error:
+    #  if self.lkas_button != CS.lkas_button_on:
+    #     self.lkas_button = CS.lkas_button_on
 
     # disable if steer angle reach 90 deg, otherwise mdps fault in some models
-    lkas_active = enabled and abs(CS.angle_steers) < 90. and self.lkas_button
+    lkas_active = enabled
 
     low_speed = self.low_speed_car
-    if not self.lkas_button:
-        low_speed = False
-    #elif not CS.cruiseState.enabled:
-    #    low_speed = False
-    elif CS.stopped:
+
+    if CS.stopped:
         low_speed = False
     elif CS.v_ego > (CS.CP.minSteerSpeed + 0.7):
         low_speed = False
@@ -196,7 +193,7 @@ class CarController():
         self.low_speed_car = low_speed
 
     # streer over check
-    if enabled and abs(CS.angle_steers) > 90. and self.lkas_button or CS.steer_error:
+    if enabled and CS.steer_error:
       self.streer_angle_over =  True
       self.steer_timer = 100
     elif abs(CS.angle_steers) < 5 or not self.steer_timer:
@@ -292,7 +289,7 @@ class CarController():
     self.apply_steer_last = apply_steer
 
 
-    hud_alert, lane_visible = self.process_hud_alert(lkas_active, self.lkas_button, visual_alert, self.hud_timer_left, self.hud_timer_right, CS )    
+    hud_alert, lane_visible = self.process_hud_alert(lkas_active, visual_alert, self.hud_timer_left, self.hud_timer_right, CS )    
 
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
     enabled_speed = 38 if CS.is_set_speed_in_mph  else 60

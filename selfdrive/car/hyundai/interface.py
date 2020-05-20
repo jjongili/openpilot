@@ -384,7 +384,7 @@ class CarInterface(CarInterfaceBase):
     self.turning_indicator_alert = self.CC.turning_indicator
   
     # LKAS button alert logic
-    self.lkas_button_alert = not self.CC.lkas_button
+    #self.lkas_button_alert = not self.CC.lkas_button
     self.low_speed_alert = self.CC.low_speed_car
     self.steer_angle_over_alert = self.CC.streer_angle_over
 
@@ -404,8 +404,8 @@ class CarInterface(CarInterfaceBase):
       events.append(create_event('wrongGear', [ET.NO_ENTRY, ET.USER_DISABLE]))
     elif self.steer_angle_over_alert or self.CS.steer_error:
       events.append(create_event('steerTempUnavailable', [ET.NO_ENTRY, ET.WARNING]))
-    elif self.lkas_button_alert:
-      events.append(create_event('lkasButtonOff', [ET.WARNING]))
+    #elif self.lkas_button_alert:
+    #  events.append(create_event('lkasButtonOff', [ET.WARNING]))
     elif self.CS.lkas_LdwsLHWarning or self.CS.lkas_LdwsRHWarning:
       events.append(create_event('ldwPermanent', [ET.WARNING]))
     
