@@ -289,7 +289,7 @@ class CarController():
     self.apply_steer_last = apply_steer
 
 
-    hud_alert, lane_visible = self.process_hud_alert(lkas_active, visual_alert, self.hud_timer_left, self.hud_timer_right, CS )    
+    hud_alert, lane_visible = self.process_hud_alert(lkas_active, visual_alert, self.hud_timer_left, self.hud_timer_right)    
 
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
     enabled_speed = 38 if CS.is_set_speed_in_mph  else 60
