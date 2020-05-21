@@ -37,8 +37,8 @@ class CarController():
     self.last_resume_frame = 0
     self.last_lead_distance = 0
     self.turning_signal_timer = 0
-    #self.lkas_button = 1
-    #self.lkas_button_last = 0
+    self.lkas_button = 1
+
     self.longcontrol = 0 #TODO: make auto
     self.low_speed_car = False 
     self.streer_angle_over = False
@@ -146,7 +146,7 @@ class CarController():
           param.STEER_DELTA_DOWN = 1
       elif abs_angle_steers < 2:
           param.STEER_DELTA_UP  = 2
-          param.STEER_DELTA_DOWN = 2
+          param.STEER_DELTA_DOWN = 3
 
 
     ### Steering Torque
@@ -289,7 +289,8 @@ class CarController():
     self.apply_steer_last = apply_steer
 
 
-    hud_alert, lane_visible = self.process_hud_alert(lkas_active, visual_alert, self.hud_timer_left, self.hud_timer_right, CS)    
+    hud_alert, lane_visible = self.process_hud_alert(lkas_active, self.lkas_button, visual_alert, self.hud_timer_left, self.hud_timer_right, CS )    
+
 
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
     enabled_speed = 38 if CS.is_set_speed_in_mph  else 60
