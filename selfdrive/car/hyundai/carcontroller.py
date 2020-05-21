@@ -54,6 +54,7 @@ class CarController():
     self.steer_torque_over = False
 
 
+    self.timer_curvature = 0
     self.SC = SpdController()
     self.sc_wait_timer2 = 0
     self.sc_active_timer2 = 0     
@@ -136,17 +137,23 @@ class CarController():
       #param.STEER_DELTA_UP  = 3
       #param.STEER_DELTA_DOWN = 3
 
-    if abs_angle_steers < 2:
+    if self.timer_curvature:
+      self.timer_curvature -= 1
+
+    #v_curvature
+    if LaC.v_curvature < 220:
+      self.timer_curvature = 300
+    elif abs_angle_steers < 2 and  self.timer_curvature <= 0:
       xp = [0,0.5,1,1.5,2]
       fp = [200,240,245,250,param.STEER_MAX]
       param.STEER_MAX = interp( abs_angle_steers, xp, fp )
 
       if abs_angle_steers < 0.5 or v_ego_kph < 5:
-          param.STEER_DELTA_UP  = 1
-          param.STEER_DELTA_DOWN = 1
-      elif abs_angle_steers < 2:
           param.STEER_DELTA_UP  = 2
           param.STEER_DELTA_DOWN = 3
+      elif abs_angle_steers < 2:
+          param.STEER_DELTA_UP  = 3
+          param.STEER_DELTA_DOWN = 5
 
 
     ### Steering Torque
@@ -248,8 +255,7 @@ class CarController():
       self.steer_torque_over = False
     elif CS.stopped:
       lkas_active = 0
-    elif self.steer_torque_over:
-      lkas_active = 0
+
     if self.streer_angle_over:
       lkas_active = 0
     elif self.turning_indicator:
