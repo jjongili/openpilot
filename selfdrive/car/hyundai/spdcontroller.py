@@ -196,8 +196,8 @@ class SpdController():
     dst_lead_distance = (CS.clu_Vanz*0.6)
 
 
-#    if dst_lead_distance < 30:
-#      dst_lead_distance = 30
+    if dst_lead_distance < 30:
+      dst_lead_distance = 30
 
     if dRel != 150:
       self.time_no_lean = 0
