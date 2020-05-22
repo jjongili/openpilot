@@ -1,3 +1,5 @@
+# This Python file uses the following encoding: utf-8
+# -*- coding: utf-8 -*-
 from cereal import car, log
 from common.numpy_fast import clip
 from selfdrive.config import Conversions as CV
