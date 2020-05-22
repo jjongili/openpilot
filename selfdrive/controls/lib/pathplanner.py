@@ -351,7 +351,7 @@ class PathPlanner():
 
 
     # 차량이 있을 경우 약간 이동하기.
-    if self.car_avoid_enable:
+    if self.car_avoid_enable and v_ego_kph > 80:
       if lca_left and lca_right:
         self.lean_offset = 0
         self.lean_wait_time = 500
