@@ -21,7 +21,7 @@ class CarInterface(CarInterfaceBase):
     ret.radarOffCan = True
 
     # Hyundai port is a community feature for now
-    ret.communityFeature = True
+    ret.communityFeature = False
 
     ret.steerActuatorDelay = 0.1  # Default delay
     ret.steerRateCost = 0.5
