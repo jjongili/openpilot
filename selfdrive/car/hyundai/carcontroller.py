@@ -1,4 +1,5 @@
 from cereal import car
+from selfdrive.config import Conversions as CV
 from common.numpy_fast import clip
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
@@ -86,8 +87,20 @@ class CarController():
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady)
     apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
 
+    if CS.left_blinker_on or CS.right_blinker_on or CS.left_blinker_flash or CS.right_blinker_flash or self.turning_signal_timer and CS.v_ego > (100 * CV.KPH_TO_MS):  # above 100km/h
+      new_steer = actuators.steer * SteerLimitParams.STEER_MAX * 0.60
+    elif CS.left_blinker_on or CS.right_blinker_on or CS.left_blinker_flash or CS.right_blinker_flash or self.turning_signal_timer and CS.v_ego > (90 * CV.KPH_TO_MS):  # btw 100km/h ~ 90km/h
+      new_steer = actuators.steer * SteerLimitParams.STEER_MAX * 0.65
+    elif CS.left_blinker_on or CS.right_blinker_on or CS.left_blinker_flash or CS.right_blinker_flash or self.turning_signal_timer and CS.v_ego > (80 * CV.KPH_TO_MS):  # btw 90km/h ~ 80km/h
+      new_steer = actuators.steer * SteerLimitParams.STEER_MAX * 0.70
+    elif CS.left_blinker_on or CS.right_blinker_on or CS.left_blinker_flash or CS.right_blinker_flash or self.turning_signal_timer and CS.v_ego > (70 * CV.KPH_TO_MS):  # btw 80km/h ~ 70km/h
+      new_steer = actuators.steer * SteerLimitParams.STEER_MAX * 0.75
+    elif CS.left_blinker_on or CS.right_blinker_on or CS.left_blinker_flash or CS.right_blinker_flash or self.turning_signal_timer and CS.v_ego > (60 * CV.KPH_TO_MS):  # btw 70km/h ~ 60km/h
+      new_steer = actuators.steer * SteerLimitParams.STEER_MAX * 0.80
+    else:
+      new_steer = actuators.steer * SteerLimitParams.STEER_MAX
+
     ### Steering Torque
-    new_steer = actuators.steer * SteerLimitParams.STEER_MAX
     apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last, CS.steer_torque_driver, SteerLimitParams)
     self.steer_rate_limited = new_steer != apply_steer
 
