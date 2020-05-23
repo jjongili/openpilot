@@ -257,6 +257,8 @@ class CarController():
       self.steer_torque_over = False
     elif CS.stopped:
       lkas_active = 0
+    elif self.steer_torque_over:
+      lkas_active = 0
 
     if self.streer_angle_over:
       lkas_active = 0
@@ -288,8 +290,10 @@ class CarController():
     vRel = int(vRel * 3.6 + 0.5)
   
     lead_objspd = CS.lead_objspd
-    str_log1 = '곡률:{:3.0f} 토크:{:5.0f} 차속:{:3.0f} 차간:{:2.0f}'.format( LaC.v_curvature, apply_steer, vRel, dRel  )
-    str_log2 = '핸들토크={:5.0f} LKAS={:1.0f} 크루즈SW={:.0f} 크루즈MODE={:.0f}'.format( CS.steer_torque_driver, CS.lkas_LdwsSysState, CS.clu_CruiseSwState, CS.cruise_set_mode  )
+    str_log1 = '도로곡률={:3.0f} 차량토크={:5.0f}'.format( LaC.v_curvature, apply_steer  )
+    #str_log1 = '곡률={:3.0f} 차량토크={:5.0f} 앞차속도={:3.0f} 앞차거리={:2.0f}'.format( LaC.v_curvature, apply_steer, vRel, dRel  )
+    str_log2 = '핸들토크={:5.0f}'.format( CS.steer_torque_driver  )
+    #str_log2 = '핸들토크={:5.0f} LKAS={:1.0f} 크루즈SW={:.0f} 크루즈MODE={:.0f}'.format( CS.steer_torque_driver, CS.lkas_LdwsSysState, CS.clu_CruiseSwState, CS.cruise_set_mode  )
     trace1.printf( '{} {}'.format( str_log1, str_log2 ) )
 
 
